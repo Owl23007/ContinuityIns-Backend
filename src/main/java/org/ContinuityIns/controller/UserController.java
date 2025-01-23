@@ -3,6 +3,7 @@ package org.ContinuityIns.controller;
 import org.ContinuityIns.pojo.Result;
 import org.ContinuityIns.pojo.User;
 import org.ContinuityIns.service.impl.EmailServiceImpl;
+import org.ContinuityIns.utils.AliOssUtil;
 import org.ContinuityIns.utils.JwtUtil;
 import org.ContinuityIns.utils.EncrUtil;
 import org.ContinuityIns.utils.ThreadLocalUtil;
@@ -17,7 +18,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.ContinuityIns.service.UserService;
 import org.ContinuityIns.mapper.EmailTokenMapper;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +46,9 @@ public class UserController {
 
     @Autowired
     private EmailServiceImpl emailService;
+
+    @Autowired
+    private AliOssUtil aliOssUtil;
 
     @Value("${org.ContinuityIns.url}")
     private String rootLink;
@@ -184,7 +190,11 @@ public class UserController {
 
     // 更新头像
     @PatchMapping("/updateAvatar")
-    public Result onUpdateAvatar(@RequestParam @URL String url){
+    public Result onUpdateAvatar(@RequestParam String url){
+        // 校验参数
+        if (!StringUtils.hasLength(url)){
+            return Result.error("URL不能为空。");
+        }
         // 更新用户头像
         userService.updateAvatar(url);
         return Result.success();
@@ -259,5 +269,13 @@ public class UserController {
         emailService.sendEmail(deleteUser.getEmail(), subject, text);
 
         return Result.success();
+    }
+
+    @GetMapping("/oss/policy")
+    public Result<Map<String, String>> getOssPolicy() {
+        // 生成上传策略（限制文件类型、大小、目录等）
+        System.out.println("getOssPolicy");
+        Map<String, String> policy = aliOssUtil.generatePolicy("avatars/", 2 * 1024 * 1024); // 限制2MB
+        return Result.success(policy);
     }
 }
