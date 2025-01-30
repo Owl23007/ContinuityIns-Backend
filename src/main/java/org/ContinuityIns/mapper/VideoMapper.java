@@ -1,6 +1,6 @@
 package org.ContinuityIns.mapper;
 
-import org.ContinuityIns.pojo.Video;
+import org.ContinuityIns.entity.Video;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

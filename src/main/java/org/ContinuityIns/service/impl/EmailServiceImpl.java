@@ -1,15 +1,20 @@
 package org.ContinuityIns.service.impl;
 
 
-import org.ContinuityIns.mapper.EmailTokenMapper;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.ContinuityIns.entity.User;
+import org.ContinuityIns.mapper.TokenMapper;
 import org.ContinuityIns.mapper.UserMapper;
-import org.ContinuityIns.pojo.EmailToken;
-import org.ContinuityIns.pojo.User;
+import org.ContinuityIns.entity.Result;
+import org.ContinuityIns.entity.DTO.UserDTO;
 import org.ContinuityIns.service.EmailService;
+import org.ContinuityIns.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,10 +24,14 @@ public class EmailServiceImpl implements EmailService {
     private JavaMailSender mailSender;
 
     @Autowired
-    private EmailTokenMapper emailTokenMapper;
+    private TokenMapper tokenMapper;
 
     @Autowired
     private UserMapper userMapper;
+
+
+    @Autowired
+    private TokenService tokenService;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -39,53 +48,43 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public EmailToken getToken(String email) {
-        return emailTokenMapper.getToken(userMapper.getUserByEmail(email).getUserId());
-    }
-
-    @Override
-    public void verifyEmail(String email, String token) {
+    public Result verifyRegisterEmail(String email, String token) {
         // 获取用户
-        User u = userMapper.getUserByEmail(email);
-
-        if(u == null) {
-            throw new RuntimeException("用户未注册或请求已过期,请重新注册");
+        UserDTO u = userMapper.getUserByEmail(email);
+        if (u == null) {
+            return  Result.error("用户不存在或邮件已过期,请先注册");
         }
-        if(u.getStatus().equals("正常")) {
-            throw new RuntimeException("用户已激活,请勿重复激活");
-        }
-
-        // 获取token
-        EmailToken emailToken = emailTokenMapper.getToken(u.getUserId());
-        if (emailToken == null) {
-            throw new RuntimeException("token不存在");
+        if(u.getStatus().equals(User.UserStatus.NORMAL)){
+            return Result.error("用户已激活，请勿重复激活");
         }
 
-        // 检查token是否正确
-        if (!token.equals(emailToken.getToken())) {
-            throw new RuntimeException("token错误");
-        }
+
+        // 验证token
+        tokenService.verifyToken(u.getUserId(), token);
 
         // 更新用户状态
-        userMapper.updateStatus( u.getUserId(),"正常");
+        userMapper.updateStatus( u.getUserId(), User.UserStatus.NORMAL);
 
         //初始化用户名和签名
-        userMapper.init(u.getUserId(), u.getUsername(), "这个人很懒，什么都没有留下", "存续院用户"+u.getUserId());
+        userMapper.init(u.getUserId(), "这个人很懒，什么都没有留下", "存续院用户"+u.getUserId());
 
 
         // 删除token
-        emailTokenMapper.deleteToken(u.getUserId());
+        tokenMapper.deleteToken(u.getUserId());
+
+        return Result.success("激活成功");
     }
 
     @Override
-    public void insertToken(String email, String token) {
-        int user_id = userMapper.getUserByEmail(email).getUserId();
-        emailTokenMapper.insertToken(user_id, token);
-    }
+    public void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-    @Override
-    public void deleteToken(String email) {
-        int user_id = userMapper.getUserByEmail(email).getUserId();
-        emailTokenMapper.deleteToken(user_id);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true);
+        helper.setFrom(from);
+
+        mailSender.send(message);
     }
 }

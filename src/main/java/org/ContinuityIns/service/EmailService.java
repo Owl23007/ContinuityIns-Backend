@@ -1,16 +1,13 @@
 package org.ContinuityIns.service;
 
 
-import org.ContinuityIns.pojo.EmailToken;
+import jakarta.mail.MessagingException;
+import org.ContinuityIns.entity.Result;
 
 public interface EmailService {
-    EmailToken getToken(String email);
-
     void sendEmail(String to, String subject, String text);
 
-    void verifyEmail(String email, String token);
+    Result verifyRegisterEmail(String email, String token);
 
-    void insertToken(String email, String token);
-
-    void deleteToken(String email);
+    void sendHtmlEmail(String email, String format, String htmlContent) throws MessagingException;
 }

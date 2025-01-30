@@ -1,4 +1,4 @@
-package org.ContinuityIns.pojo;
+package org.ContinuityIns.entity;
 
 import lombok.Data;
 

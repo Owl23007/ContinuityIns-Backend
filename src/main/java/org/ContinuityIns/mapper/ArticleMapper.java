@@ -2,7 +2,7 @@ package org.ContinuityIns.mapper;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.ContinuityIns.pojo.Article;
+import org.ContinuityIns.entity.Article;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

@@ -1,7 +1,6 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.pojo.Comment;
-import org.springframework.stereotype.Service;
+import org.ContinuityIns.entity.Comment;
 
 import java.util.List;
 

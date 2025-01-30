@@ -1,5 +1,6 @@
 package org.ContinuityIns.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,14 +15,19 @@ public class MailConfig {
      * @date 2024/12/24
      * @Author  Oii Woof
      */
+    @Value("${spring.mail.username}")
+    private String from;
+    @Value("${spring.mail.password}")
+    private String password;
 
     @Bean
     public JavaMailSender javaMailSender() {
+
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.qq.com");
         mailSender.setPort(587);
-        mailSender.setUsername("ContinuityIns@foxmail.com");
-        mailSender.setPassword("amikhbtnxtgidbjb");
+        mailSender.setUsername(from);
+        mailSender.setPassword(password);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

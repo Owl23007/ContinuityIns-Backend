@@ -1,14 +1,7 @@
 package org.ContinuityIns.service.impl;
 
-import org.ContinuityIns.mapper.VideoMapper;
-import org.ContinuityIns.pojo.Video;
 import org.ContinuityIns.service.VideoService;
-import org.ContinuityIns.utils.ThreadLocalUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class VideoServiceImpl implements VideoService {

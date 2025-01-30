@@ -1,7 +1,7 @@
 package org.ContinuityIns.mapper;
 
 
-import org.ContinuityIns.pojo.Comment;
+import org.ContinuityIns.entity.Comment;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 public interface CommentMapper {
 
     //添加评论
-    @Insert("insert into comment (user_id,content,TargetType,parent_id) values (#{userId},#{comment},#{TargetType},#{ParentId})")
+    @Insert("insert into comment (user_id,content,target_type,parent_id) values (#{userId},#{comment},#{TargetType},#{ParentId})")
     void addComment(Comment comment);
 
     //修改评论内容
@@ -22,7 +22,7 @@ public interface CommentMapper {
     void deleteComment(int CommentId);
 
     //获取评论列表
-    @Select("select * from comment where TargetType = #{TargetType} and parent_id = #{TargetId}")
+    @Select("select * from comment where target_type = #{TargetType} and parent_id = #{TargetId}")
     List<Comment> getCommentList(String TargetType, int TargetId);
 
     //获取评论数据

@@ -1,24 +1,32 @@
 package org.ContinuityIns.service;
 
-import jakarta.validation.constraints.Pattern;
-import org.ContinuityIns.pojo.User;
+import org.ContinuityIns.entity.Result;
+import org.ContinuityIns.entity.DTO.UserDTO;
+
+import java.util.Map;
 
 public interface UserService {
-    User getUserByUsername(String username);
+    Result register(String username, String email, String password);
 
-    User getUserById(Integer userId);
+    Result<String> activateAccount(String email, String token);
 
-    User getUserByEmail(String email);
+    Result<String> login(String identifier, String password);
 
-    void register(String username, String email, String password);
+    Result<UserDTO> getUserInfo();
 
-    void updateInfo(String nickname, String signature);
+    Result getUserInfoById(Integer userId);
 
-    void updateAvatar(String url);
+    Result updateUserInfo(String nickname, String signature);
 
-    void updatePassword(String newPwd);
+    Result updateAvatar(String url);
 
-    void deleteAcc(Integer userId);
+    Result updatePassword(Map<String, String> params);
 
-    String getUsernameByEmail(@Pattern(regexp = "^\\S{5,16}$") String identifier);
+    Result deleteAccount(String password);
+
+    Result<Map<String, String>> getOssPolicy();
+
+    Result sendResetEmail(String email);
+
+    Result resetPassword(String email, String token, String password);
 }
