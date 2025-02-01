@@ -1,7 +1,6 @@
 package org.ContinuityIns.mapper;
 
-import org.ContinuityIns.entity.DTO.UserDTO;
-import org.ContinuityIns.entity.User;
+import org.ContinuityIns.DTO.UserDTO;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -43,7 +42,7 @@ public interface UserMapper {
     // 更新用户状态
     @Update("UPDATE users SET status = #{status}, update_time = NOW() WHERE user_id = #{id}")
     void updateStatus(@Param("id") Integer id,
-                      @Param("status") User.UserStatus status);
+                      @Param("status") UserDTO.UserStatus status);
 
     // 更新用户头像
     @Update("UPDATE users SET avatar_image = #{url}, update_time = NOW() WHERE user_id = #{id}")
@@ -57,12 +56,9 @@ public interface UserMapper {
                         @Param("salt") String salt);
 
     // 注销用户
-    @Update("UPDATE users SET status ='DEACTIVATED', update_time = NOW() WHERE user_id = #{id}")
+    @Update("UPDATE users SET status ='DEACTIVATED', username = CONCAT('注销', user_id), email = CONCAT('注销', user_id) ,update_time = NOW() WHERE user_id = #{id}")
     void cancel(@Param("id") Integer id);
 
-    // 释放用户名
-    @Update("UPDATE users SET username = CONCAT('注销', user_id), email = CONCAT('注销', user_id) WHERE user_id = #{userId}")
-    void releaseUser(@Param("userId") Integer userId);
 
     // 删除未验证且已删除token的用户
     @Delete("DELETE FROM users WHERE status = 'UNVERIFIED' AND user_id NOT IN (SELECT user_id FROM user_tokens)")

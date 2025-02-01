@@ -1,36 +1,55 @@
 package org.ContinuityIns.exception;
 
-
-import org.ContinuityIns.entity.Result;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-// 全局异常处理
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-    /**
-     * 处理自定义异常
-     * @Author:      MoXueYao
-     * */
+@ControllerAdvice
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // 处理所有异常
-    @ExceptionHandler(Exception.class)
-    public Result handException(Exception e) {
-        // 打印异常信息
-        e.printStackTrace();
-        // 返回错误信息
-        return Result.error(StringUtils.hasLength(e.getMessage())?e.getMessage():"操作失败。");
+    // 处理特定异常
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> resourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+        String errorMessageDescription = ex.getLocalizedMessage();
+        if (errorMessageDescription == null) errorMessageDescription = ex.toString();
+        ErrorMessage errorMessage = new ErrorMessage(errorMessageDescription);
+        return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Result> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = "用户名为5-16位英文数字组合";
-        return ResponseEntity.badRequest().body(Result.error(errorMessage));
+    // 处理其他所有类型的异常
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> globalExceptionHandler(Exception ex, WebRequest request) {
+        String errorMessageDescription = ex.getLocalizedMessage();
+        if (errorMessageDescription == null) errorMessageDescription = ex.toString();
+        ErrorMessage errorMessage = new ErrorMessage(errorMessageDescription);
+        return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    // 自定义异常类
+    class ResourceNotFoundException extends RuntimeException {
+        public ResourceNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    // 错误消息类
+    class ErrorMessage {
+        private String message;
+
+        public ErrorMessage(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
     }
 }

@@ -3,11 +3,10 @@ package org.ContinuityIns.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.ContinuityIns.entity.User;
 import org.ContinuityIns.mapper.TokenMapper;
 import org.ContinuityIns.mapper.UserMapper;
-import org.ContinuityIns.entity.Result;
-import org.ContinuityIns.entity.DTO.UserDTO;
+import org.ContinuityIns.common.Result;
+import org.ContinuityIns.DTO.UserDTO;
 import org.ContinuityIns.service.EmailService;
 import org.ContinuityIns.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,7 @@ public class EmailServiceImpl implements EmailService {
         if (u == null) {
             return  Result.error("用户不存在或邮件已过期,请先注册");
         }
-        if(u.getStatus().equals(User.UserStatus.NORMAL)){
+        if(u.getStatus().equals(UserDTO.UserStatus.NORMAL)){
             return Result.error("用户已激活，请勿重复激活");
         }
 
@@ -63,7 +62,7 @@ public class EmailServiceImpl implements EmailService {
         tokenService.verifyToken(u.getUserId(), token);
 
         // 更新用户状态
-        userMapper.updateStatus( u.getUserId(), User.UserStatus.NORMAL);
+        userMapper.updateStatus( u.getUserId(), UserDTO.UserStatus.NORMAL);
 
         //初始化用户名和签名
         userMapper.init(u.getUserId(), "这个人很懒，什么都没有留下", "存续院用户"+u.getUserId());

@@ -1,7 +1,8 @@
 package org.ContinuityIns.service.impl;
 
+
+import org.ContinuityIns.DTO.CommentDTO;
 import org.ContinuityIns.mapper.CommentMapper;
-import org.ContinuityIns.entity.Comment;
 import org.ContinuityIns.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,37 +17,37 @@ public class CommentServiceImpl implements CommentService {
     private CommentMapper commentMapper;
 
     @Override
-    public void addComment(Comment comment) {
-        commentMapper.addComment(comment);
+    public void addComment(CommentDTO commentDTO) {
+        commentMapper.addComment(commentDTO);
     }
 
     @Override
-    public void deleteComment(int commentId) {
-        commentMapper.deleteComment(commentId);
+    public void deleteComment(int commentDTOId) {
+        commentMapper.deleteComment(commentDTOId);
     }
 
     @Override
-    public List<Comment> getCommentList(String targetType, int targetId) {
+    public List<CommentDTO> getCommentList(String targetType, int targetId) {
         return commentMapper.getCommentList(targetType, targetId);
     }
 
     @Override
-    public Integer getCommentData(int commentId) {
-        return commentMapper.getCommentData(commentId);
+    public Integer getCommentData(int commentDTOId) {
+        return commentMapper.getCommentData(commentDTOId);
     }
 
     @Override
-    public void UpdateCommentContent(Comment comment) {
-        commentMapper.UpdateCommentContent(comment);
+    public void UpdateCommentContent(CommentDTO commentDTO) {
+        commentMapper.UpdateCommentContent(commentDTO);
     }
 
     @Override
-    public void likeComment(int commentId, int userId) {
-        commentMapper.likeComment(commentId, userId);
+    public void likeComment(int commentDTOId, int userId) {
+        commentMapper.likeComment(commentDTOId, userId);
     }
 
     @Override
-    public void cancelLikeComment(int commentId, int userId) {
-        commentMapper.cancelLikeComment(commentId, userId);
+    public void cancelLikeComment(int commentDTOId, int userId) {
+        commentMapper.cancelLikeComment(commentDTOId, userId);
     }
 }

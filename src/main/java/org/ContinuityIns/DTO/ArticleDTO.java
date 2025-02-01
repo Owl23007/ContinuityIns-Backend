@@ -1,7 +1,6 @@
-package org.ContinuityIns.entity.DTO;
+package org.ContinuityIns.DTO;
 
 import lombok.Data;
-import org.ContinuityIns.entity.Article;
 
 @Data
 public class ArticleDTO {
@@ -11,7 +10,11 @@ public class ArticleDTO {
     private String nickname;
     private String content;
     private String coverImage;
-    private Article.ArticleStatus status;
+    private ArticleStatus status;
     private Integer duration;
     private String createTime;
+
+    enum ArticleStatus {
+        PUBLISHED, DRAFT, BANNED, PRIVATE
+    }
 }

@@ -1,7 +1,7 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.entity.Result;
-import org.ContinuityIns.entity.DTO.UserDTO;
+import org.ContinuityIns.common.Result;
+import org.ContinuityIns.DTO.UserDTO;
 
 import java.util.Map;
 

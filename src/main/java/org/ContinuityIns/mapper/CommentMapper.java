@@ -1,7 +1,7 @@
 package org.ContinuityIns.mapper;
 
 
-import org.ContinuityIns.entity.Comment;
+import org.ContinuityIns.DTO.CommentDTO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -10,23 +10,23 @@ import java.util.List;
 public interface CommentMapper {
 
     //添加评论
-    @Insert("insert into comment (user_id,content,target_type,parent_id) values (#{userId},#{comment},#{TargetType},#{ParentId})")
-    void addComment(Comment comment);
+    @Insert("insert into comments (user_id,content,target_type,target_id) values (#{userId},#{comment},#{TargetType},#{ParentId})")
+    void addComment(CommentDTO comment);
 
     //修改评论内容
-    @Update("update comment set content = #{comment} where comment_id = #{CommentId}")
-    void UpdateCommentContent(Comment comment);
+    @Update("update comments set content = #{comment} where comment_id = #{CommentId}")
+    void UpdateCommentContent(CommentDTO comment);
 
     //删除评论
-    @Update("update comment set status = '删除' where comment_id = #{CommentId}")
+    @Update("update comments set status = '删除' where comment_id = #{CommentId}")
     void deleteComment(int CommentId);
 
     //获取评论列表
-    @Select("select * from comment where target_type = #{TargetType} and parent_id = #{TargetId}")
-    List<Comment> getCommentList(String TargetType, int TargetId);
+    @Select("select * from comments where target_type = #{TargetType} and target_id = #{TargetId}")
+    List<CommentDTO> getCommentList(String TargetType, int TargetId);
 
     //获取评论数据
-    @Select("select * from comment where comment_id = #{CommentId}")
+    @Select("select * from comments where comment_id = #{CommentId}")
     void getComment(int CommentId);
 
     //点赞评论

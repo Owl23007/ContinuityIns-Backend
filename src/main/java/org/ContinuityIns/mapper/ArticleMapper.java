@@ -2,7 +2,8 @@ package org.ContinuityIns.mapper;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.ContinuityIns.entity.Article;
+
+import org.ContinuityIns.DTO.ArticleDTO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -36,19 +37,19 @@ public interface ArticleMapper {
 
     // 获取文章预览列表
     @Select("select * from articles")
-    List<Article> getList();
+    List<ArticleDTO> getList();
 
     // 根据文章id获取文章
     @Select("select * from articles where article_id = #{id}")
-    Article getArticleById(Integer id);
+    ArticleDTO getArticleById(Integer id);
 
     // 根据用户id获取文章预览
     @Select("select * from articles where user_id = #{userId}")
-    List<Article> getArticleListByUser(Integer userId);
+    List<ArticleDTO> getArticleListByUser(Integer userId);
 
     // 获取文章的收藏、点赞、浏览数
     @Select("SELECT " +
-            "SUM(CASE WHEN is_stared = TRUE THEN 1 ELSE 0 END) AS starCount, " +
+            "SUM(CASE WHEN is_starred = TRUE THEN 1 ELSE 0 END) AS starCount, " +
             "SUM(CASE WHEN is_liked = TRUE THEN 1 ELSE 0 END) AS likeCount, " +
             "COUNT(*) AS viewCount " +
             "FROM article_view_records " +

@@ -1,17 +1,7 @@
 package org.ContinuityIns.controller;
 
-import jakarta.validation.constraints.Pattern;
-import org.ContinuityIns.entity.Result;
-import org.ContinuityIns.service.ArticleService;
-import jakarta.validation.constraints.NotNull;
-import org.ContinuityIns.utils.ThreadLocalUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/article")

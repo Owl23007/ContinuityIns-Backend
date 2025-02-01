@@ -1,8 +1,7 @@
 package org.ContinuityIns.controller;
 
-import jakarta.websocket.OnError;
-import org.ContinuityIns.entity.Result;
-import org.ContinuityIns.entity.DTO.UserDTO;
+import org.ContinuityIns.common.Result;
+import org.ContinuityIns.DTO.UserDTO;
 import org.ContinuityIns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;

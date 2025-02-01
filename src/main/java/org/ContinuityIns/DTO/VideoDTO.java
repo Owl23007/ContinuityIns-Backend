@@ -1,7 +1,7 @@
-package org.ContinuityIns.entity.DTO;
+package org.ContinuityIns.DTO;
 
 import lombok.Data;
-import org.ContinuityIns.entity.Video;
+import org.ContinuityIns.DTO.VideoDTO;
 
 @Data
 public class VideoDTO {
@@ -10,8 +10,12 @@ public class VideoDTO {
     private String nickname;
     private String title;
     private String coverImage;
-    private Video.VideoStatus status;
+    private VideoStatus status;
     private Integer duration;
     private String description;
     private String createTime;
+
+    public enum VideoStatus{
+        PUBLISHED, DRAFT, BANNED, PRIVATE
+    }
 }

@@ -1,7 +1,6 @@
-package org.ContinuityIns.entity.DTO;
+package org.ContinuityIns.DTO;
 
 import lombok.Data;
-import org.ContinuityIns.entity.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,8 +11,18 @@ public class CommentDTO {
     private String nickname;
     private String content;
     private LocalDateTime createTime;
-    private Comment.CommentStatus status;
+    private CommentStatus status;
     private Long parentId;
-    private Comment.TargetType targetType;
+    private TargetType targetType;
     private List<CommentDTO> replies;
+
+
+    enum CommentStatus {
+        PUBLISHED, BANNED, DELETED
+    }
+
+    enum TargetType {
+        ARTICLE, VIDEO, COMMENT
+    }
 }
+

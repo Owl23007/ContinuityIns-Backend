@@ -1,7 +1,7 @@
-package org.ContinuityIns.entity.DTO;
+package org.ContinuityIns.DTO;
 
 import lombok.Data;
-import org.ContinuityIns.entity.User;
+
 
 @Data
 public class UserDTO {
@@ -10,6 +10,10 @@ public class UserDTO {
     private String nickname;
     private String signature;
     private String avatarImage;
-    private User.UserStatus status;
+    private UserStatus status;
     private String email;
+
+    public enum UserStatus {
+        UNVERIFIED, NORMAL, BANNED, DEACTIVATED
+    }
 }

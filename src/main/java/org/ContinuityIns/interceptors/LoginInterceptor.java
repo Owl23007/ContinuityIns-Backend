@@ -1,5 +1,6 @@
 package org.ContinuityIns.interceptors;
 
+import jakarta.validation.constraints.NotNull;
 import org.ContinuityIns.utils.JwtUtil;
 import org.ContinuityIns.utils.ThreadLocalUtil;
 import jakarta.servlet.http.HttpServletRequest;
