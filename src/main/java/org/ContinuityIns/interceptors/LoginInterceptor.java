@@ -1,6 +1,9 @@
 package org.ContinuityIns.interceptors;
 
 import jakarta.validation.constraints.NotNull;
+import org.ContinuityIns.DTO.UserDTO;
+import org.ContinuityIns.mapper.UserMapper;
+import org.ContinuityIns.service.UserService;
 import org.ContinuityIns.utils.JwtUtil;
 import org.ContinuityIns.utils.ThreadLocalUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +16,14 @@ import java.util.Map;
 //请求拦截器，返回true代表放行，返回false代表不放行
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
+    private final UserService userService;
+    private final UserMapper userMapper;
+
+    public LoginInterceptor(UserService userService, UserMapper userMapper) {
+        this.userService = userService;
+        this.userMapper = userMapper;
+    }
+
     /**
      * 该实现总是返回 {@code true}.
      * @param request 当前的 HTTP 请求
@@ -35,11 +46,11 @@ public class LoginInterceptor implements HandlerInterceptor {
             Map<String, Object> claims = JwtUtil.parseToken(token);
             // 将token携带的信息存放在ThreadLocal中
             ThreadLocalUtil.set(claims);
+
             // 放行
             return true;
         } catch (Exception e){
             // 拦截
-            System.out.println();
             response.setStatus(401);
             return false;
         }

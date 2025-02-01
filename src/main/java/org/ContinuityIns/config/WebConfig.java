@@ -12,8 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     /**
      * 拦截器配置
-     * @date 2024/11/9
-     * @Author  MoXueYao
+     * @Date  2024/11/9
      * @Description     添加拦截器,将不需要拦截的接口排除在外
      */
     // 注入拦截器

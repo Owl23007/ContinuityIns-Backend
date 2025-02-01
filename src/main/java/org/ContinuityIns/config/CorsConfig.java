@@ -1,5 +1,6 @@
 package org.ContinuityIns.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,13 +15,16 @@ public class CorsConfig {
      * @Author  Oii Woof
         */
 
+    @Value("${org.ContinuityIns.url}")
+    private String URL;
+
     @Bean
     public CorsFilter corsFilter() {
         // 添加CORS配置信息
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin(URL);
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setMaxAge(1800L); // 预检请求的缓存时间（秒）

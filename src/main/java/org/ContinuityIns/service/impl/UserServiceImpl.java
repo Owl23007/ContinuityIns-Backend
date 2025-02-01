@@ -92,9 +92,42 @@ public class UserServiceImpl implements UserService {
         }
         String token = UUID.randomUUID().toString();
         tokenService.insertToken(u.getUserId());
-        String subject = "欢迎注册ContinuityIns";
-        String text = "欢迎注册ContinuityIns，点击链接激活账号：" + rootLink + "/user/active?email=" + email + "&token=" + token;
-        emailService.sendEmail(email, subject, text);
+
+        String htmlContent= String.format(
+                "<div style='font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;'>" +
+                        "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>欢迎注册%s</h3>" +
+                        "<p>尊敬的新用户：</p>" +
+                        "<p>感谢您注册%s！为了完成您的注册流程，请点击下方按钮激活您的账户：</p>" +
+                        "<a href='%s/user/active?email=%s&token=%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;'>立即激活账户</a>" +
+                        "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>" +
+                        "<h4 style='margin-top: 0; color: #2C5282;'>安全提示：</h4>" +
+                        "<ul style='margin: 0; padding-left: 20px; color: #4A5568;'>" +
+                        "<li>链接有效期至：注册后24小时</li>" +
+                        "<li>请确认浏览器地址栏显示：<code>%s</code></li>" +
+                        "<li>不要将链接分享给任何人</li>" +
+                        "</ul>" +
+                        "</div>" +
+                        "<div style='margin-top: 24px; padding: 16px; background: #EBF8FF; border-radius: 4px;'>" +
+                        "<p style='margin: 0;'>需要帮助？请联系我们：</p>" +
+                        "<ul style='margin: 8px 0 0 20px; padding-left: 0; list-style: none;'>" +
+                        "<li>✉ 服务邮箱：%s</li>" +
+                        "<li>🕒 工作时间：周一至周五 9:00-18:00</li>" +
+                        "</ul>" +
+                        "</div>" +
+                        "<footer style='margin-top: 24px; color: #718096; font-size: 0.9em; text-align: center;'>" +
+                        "<p>%s 团队</p>" +
+                        "</footer>" +
+                        "</div>",
+                companyName, companyName, rootLink, email, token,rootLink,serviceEmail, companyName);
+        try {
+            emailService.sendHtmlEmail(
+                    email,
+                    String.format("欢迎!你正在注册%s的账号", companyName),
+                    htmlContent
+            );
+        }catch (MessagingException e){
+            throw new RuntimeException(e);
+        }
         return Result.success("注册成功，请查看邮箱以激活账号");
     }
 
@@ -199,8 +232,8 @@ public class UserServiceImpl implements UserService {
         // 获取用户信息
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
-        String username = (String) map.get("username");
-        UserDTO deleteUser = userMapper.getUserByUsername(username);
+
+        UserDTO deleteUser = userMapper.getUserById(userId);
         String salt = userMapper.getSaltByUserId(deleteUser.getUserId());
 
         // 检查密码是否正确
@@ -209,16 +242,18 @@ public class UserServiceImpl implements UserService {
         }
 
         // 注销账户
+        String username = deleteUser.getUsername();
         String email = deleteUser.getEmail();
+
         userMapper.cancel(userId);
 
-        if (!Objects.equals(deleteUser.getStatus(), UserDTO.UserStatus.DEACTIVATED)) {
+        if (!Objects.equals(userMapper.getUserById(userId).getStatus(), UserDTO.UserStatus.DEACTIVATED)) {
             return Result.error("注销失败。");
         }
 
         //创建新token
-        tokenService.insertToken(deleteUser.getUserId());
-        String token = tokenMapper.getToken(deleteUser.getUserId()).getToken();
+        tokenService.insertToken(userId);
+        String token = tokenMapper.getToken(userId).getToken();
 
         // 发送注销邮件
         String htmlContent = String.format(
