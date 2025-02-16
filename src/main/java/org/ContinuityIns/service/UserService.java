@@ -29,4 +29,6 @@ public interface UserService {
     Result sendResetEmail(String email);
 
     Result resetPassword(String email, String token, String password);
+
+    Boolean isVaildate(Integer userId);
 }

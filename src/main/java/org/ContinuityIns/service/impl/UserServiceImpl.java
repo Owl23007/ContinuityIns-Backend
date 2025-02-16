@@ -139,6 +139,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<String> login(String identifier, String password) {
+        //public
         String username = identifier.contains("@") ? userMapper.getUsernameByEmail(identifier) : identifier;
         UserDTO loginUser = userMapper.getUserByUsername(username);
         if (loginUser == null) {
@@ -165,14 +166,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<UserDTO> getUserInfo() {
+        //private
         Map<String, Object> map = ThreadLocalUtil.get();
         String username = (String) map.get("username");
+
+        if(!isVaildate((Integer) map.get("id"))){
+            return Result.error("用户状态异常");
+        }
         UserDTO u = userMapper.getUserByUsername(username);
         return Result.success(u);
     }
 
     @Override
     public Result getUserInfoById(Integer userId) {
+        //public
         UserDTO u = userMapper.getUserById(userId);
         if (u == null) {
             return Result.error("用户不存在");
@@ -187,23 +194,36 @@ public class UserServiceImpl implements UserService {
         }
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
+        // 检查用户是否存在且状态正常
+        if (!isVaildate(userId)) {
+            return Result.error("用户状态异常");
+        }
         userMapper.update(userId, signature, nickname);
         return Result.success();
     }
 
     @Override
     public Result updateAvatar(String url) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer userId = (Integer) map.get("id");
+
+        if (!isVaildate(userId)) {
+            return Result.error("用户状态异常");
+        }
+
         if (!StringUtils.hasLength(url)) {
             return Result.error("URL不能为空。");
         }
-        Map<String, Object> map = ThreadLocalUtil.get();
-        Integer userId = (Integer) map.get("id");
+
         userMapper.updateAvatar(userId, url);
         return Result.success();
     }
 
     @Override
     public Result updatePassword(Map<String, String> params) {
+        if (!isVaildate((Integer) ThreadLocalUtil.get().get("id"))) {
+            return Result.error("用户状态异常");
+        }
         String oldPwd = params.get("old_pwd");
         String newPwd = params.get("new_pwd");
         String rePwd = params.get("re_pwd");
@@ -230,8 +250,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result deleteAccount(String password) {
         // 获取用户信息
-        Map<String, Object> map = ThreadLocalUtil.get();
-        Integer userId = (Integer) map.get("id");
+        Integer userId = (Integer) ThreadLocalUtil.get().get("id");
+        if (!isVaildate(userId)) {
+            return Result.error("用户状态异常");
+        }
 
         UserDTO deleteUser = userMapper.getUserById(userId);
         String salt = userMapper.getSaltByUserId(deleteUser.getUserId());
@@ -293,7 +315,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<Map<String, String>> getOssPolicy() {
+    public Result getOssPolicy() {
+        if (!isVaildate((Integer) ThreadLocalUtil.get().get("id"))) {
+            return Result.error("用户状态异常");
+        }
         Map<String, String> policy = aliOssUtil.generatePolicy("avatars/", 2 * 1024 * 1024);
         return Result.success(policy);
     }
@@ -304,6 +329,10 @@ public class UserServiceImpl implements UserService {
         UserDTO user = userMapper.getUserByEmail(email);
         if (user == null) {
             return Result.error("用户不存在");
+        }
+        // 获取用户状态
+        if (!user.getStatus().equals(UserDTO.UserStatus.NORMAL)) {
+            return Result.error("用户状态异常");
         }
 
         final int userId = user.getUserId();
@@ -409,10 +438,21 @@ public class UserServiceImpl implements UserService {
         if (u == null) {
             return Result.error("用户不存在");
         }
+        //判断用户状态
+        if (!u.getStatus().equals(UserDTO.UserStatus.NORMAL)) {
+            return Result.error("用户状态异常");
+        }
         tokenMapper.deleteToken(u.getUserId());
         String salt = EncrUtil.getSalt();
         String hashPassword = EncrUtil.getHash(password, salt);
         userMapper.updatePassword(u.getUserId(), hashPassword, salt);
         return Result.success("重置密码成功");
+    }
+
+    @Override
+    public Boolean isVaildate(Integer userId) {
+        // 检查用户是否存在且状态正常
+        UserDTO user = userMapper.getUserById(userId);
+        return user != null && user.getStatus().equals(UserDTO.UserStatus.NORMAL);
     }
 }
