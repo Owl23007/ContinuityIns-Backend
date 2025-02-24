@@ -24,7 +24,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin(URL);
+        config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setMaxAge(1800L); // 预检请求的缓存时间（秒）

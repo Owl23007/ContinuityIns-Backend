@@ -80,6 +80,10 @@ public class AiClientUtil {
             TaskContext context = activeTasks.get(taskId);
             if (context != null && System.currentTimeMillis() - context.lastActivityTime > 60000) {
                 if (context.sink.tryEmitNext("data: [TIMEOUT]").isFailure()) {
+                    // 如果发生错误，说明下游取消了订阅,检测任务是否已经被取消
+                    if (!activeTasks.containsKey(taskId)) {
+                        return;
+                    }
                     logger.warn("未能为任务发出超时消息 {}", taskId);
                 }
                 context.sink.tryEmitComplete();

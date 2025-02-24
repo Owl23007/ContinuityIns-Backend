@@ -1,7 +1,6 @@
 package org.ContinuityIns.DTO;
 
 import lombok.Data;
-import org.ContinuityIns.DTO.VideoDTO;
 
 @Data
 public class VideoDTO {
@@ -18,4 +17,6 @@ public class VideoDTO {
     public enum VideoStatus{
         PUBLISHED, DRAFT, BANNED, PRIVATE
     }
+
+
 }

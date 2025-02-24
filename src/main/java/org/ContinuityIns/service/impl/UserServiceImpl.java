@@ -433,7 +433,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result resetPassword(String email, String token, String password) {
-        emailService.verifyRegisterEmail(email, token);
+        // 获取用户信息
         UserDTO u = userMapper.getUserByEmail(email);
         if (u == null) {
             return Result.error("用户不存在");
@@ -442,7 +442,11 @@ public class UserServiceImpl implements UserService {
         if (!u.getStatus().equals(UserDTO.UserStatus.NORMAL)) {
             return Result.error("用户状态异常");
         }
-        tokenMapper.deleteToken(u.getUserId());
+
+        if (!tokenService.verifyToken(u.getUserId(), token)) {
+            return Result.error("token验证失败");
+        }
+
         String salt = EncrUtil.getSalt();
         String hashPassword = EncrUtil.getHash(password, salt);
         userMapper.updatePassword(u.getUserId(), hashPassword, salt);
