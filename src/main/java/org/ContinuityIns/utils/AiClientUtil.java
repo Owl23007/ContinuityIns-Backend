@@ -9,7 +9,6 @@ import reactor.core.publisher.Sinks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -54,12 +53,12 @@ public class AiClientUtil {
         }
     }
 
-    public String initiateChat(JsonNode message) {
+    public String initiateChat(JsonNode message, String model) {
 
         String taskId = UUID.randomUUID().toString();
         Sinks.Many<String> sink = Sinks.many().multicast().onBackpressureBuffer(100, false);
         Map<String, Object> requestBodyMap = Map.of(
-                "model", "deepseek-r1",
+                "model", model,
                 "messages", message,
                 "stream", true,
                 "stream_options", Map.of("include_usage", true)
@@ -146,19 +145,18 @@ public class AiClientUtil {
                 .takeWhile(line -> activeTasks.containsKey(taskId))
                 .doOnNext(line -> {
                     TaskContext context = activeTasks.get(taskId);
-                    if (context != null) {
-                        context.lastActivityTime = System.currentTimeMillis();
-                    }
+                    if (context == null) return; // 增加空检查
+
+                    context.lastActivityTime = System.currentTimeMillis();
+
                     if (line.trim().equals("data: [DONE]")) {
-                        sink.tryEmitComplete();
+                        if (!sink.tryEmitComplete().isSuccess()) {
+                            cleanupTask(taskId); // 确保资源清理
+                        }
                     } else {
                         if (sink.tryEmitNext(line).isFailure()) {
-                            // 如果发生错误，说明下游取消了订阅
-                            //检测任务是否已经被取消
-                            if (!activeTasks.containsKey(taskId)) {
-                                return;
-                            }
-                            logger.warn("未能为任务发出消息 {}", taskId);
+                            cleanupTask(taskId); // 立即清理失效任务
+                            logger.warn("下游已取消订阅，清理任务 {}", taskId);
                         }
                     }
                 })
@@ -185,10 +183,17 @@ public class AiClientUtil {
                 .subscribe();
     }
 
+    // 修改 cleanupTask 方法
     private void cleanupTask(String taskId) {
         TaskContext context = activeTasks.remove(taskId);
         if (context != null) {
             context.timeoutTask.cancel(true);
+            context.future.cancel(true);
+            try {
+                context.sink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
+            } catch (Exception e) {
+                logger.debug("流已完成无需清理");
+            }
         }
     }
 

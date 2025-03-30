@@ -1,8 +1,14 @@
 package org.ContinuityIns.controller;
 
+import com.aliyun.oss.OSSClient;
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.auth.sts.AssumeRoleRequest;
+import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DTO.UserDTO;
 import org.ContinuityIns.service.UserService;
+import org.ContinuityIns.utils.AliOssUtil;
+import org.ContinuityIns.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -69,8 +75,9 @@ public class UserController {
     }
 
     @GetMapping("/oss/policy")
-    public Result<Map<String, String>> onGetOssPolicy() {
-        return userService.getOssPolicy();
+    public Result<Map<String, Object>> onGetOssPolicy(@RequestParam @Pattern(regexp = "^(avatar|background|article)$") String type) {
+        // 获取OSS上传策略
+        return userService.getOssPolicy(type);
     }
 
     @PostMapping("/sendResetEmail")
@@ -83,5 +90,15 @@ public class UserController {
                                 @RequestParam String token,
                                 @RequestParam String password) {
         return userService.resetPassword(email, token, password);
+    }
+
+    @PostMapping("/validateToken")
+    public Result validateToken(@RequestParam String token) {
+        boolean isValid = JwtUtil.validateToken(token);
+        if (isValid) {
+            return Result.success("Token验证成功");
+        } else {
+            return Result.error("Token无效或已过期");
+        }
     }
 }

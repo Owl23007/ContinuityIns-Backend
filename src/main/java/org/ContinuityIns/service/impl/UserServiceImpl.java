@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
                         "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>欢迎注册%s</h3>" +
                         "<p>尊敬的新用户：</p>" +
                         "<p>感谢您注册%s！为了完成您的注册流程，请点击下方按钮激活您的账户：</p>" +
-                        "<a href='%s/user/active?email=%s&token=%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;'>立即激活账户</a>" +
+                        "<a href='%s/auth/active?email=%s&token=%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;'>立即激活账户</a>" +
                         "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>" +
                         "<h4 style='margin-top: 0; color: #2C5282;'>安全提示：</h4>" +
                         "<ul style='margin: 0; padding-left: 20px; color: #4A5568;'>" +
@@ -315,12 +315,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result getOssPolicy() {
+    public Result<Map<String, Object>> getOssPolicy(String type) {
         if (!isVaildate((Integer) ThreadLocalUtil.get().get("id"))) {
             return Result.error("用户状态异常");
         }
-        Map<String, String> policy = aliOssUtil.generatePolicy("avatars/", 2 * 1024 * 1024);
-        return Result.success(policy);
+        String path;
+        int maxSize;
+
+        switch (type) {
+            case "avatar":
+                path = "avatar";
+                maxSize = 2 * 1024 * 1024;
+                break;
+            case "background":
+                path = "background";
+                maxSize = 10 * 1024 * 1024;
+                break;
+            case "article":
+                path = "article";
+                maxSize = 10 * 1024 * 1024;
+                break;
+            default:
+                return Result.error("类型错误");
+        }
+        // 获取OSS上传策略
+
+
+        return Result.success(aliOssUtil.getSTSToken(path, maxSize));
     }
 
     @Override

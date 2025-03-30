@@ -1,21 +1,18 @@
 package org.ContinuityIns.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.ContinuityIns.DTO.UserDTO;
-import org.ContinuityIns.mapper.UserMapper;
+
 import org.ContinuityIns.service.AiService;
 import org.ContinuityIns.service.UserService;
 import org.ContinuityIns.utils.AiClientUtil;
 import org.ContinuityIns.utils.ThreadLocalUtil;
-import org.apache.catalina.User;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.SignalType;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class AiServiceImpl implements AiService {
@@ -27,8 +24,9 @@ public class AiServiceImpl implements AiService {
     @Autowired
     private UserService userService;
 
+
     @Override
-    public String create(JsonNode message) {
+    public String create(JsonNode message, String model) {
 
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
@@ -37,7 +35,7 @@ public class AiServiceImpl implements AiService {
             return null;
         }
 
-        String taskId = aiClientUtil.initiateChat(message);
+        String taskId = aiClientUtil.initiateChat(message, model);
         if (userTasksMap.containsKey(userId)) {
             userTasksMap.get(userId).add(taskId);
         } else {
@@ -48,21 +46,34 @@ public class AiServiceImpl implements AiService {
         return taskId;
     }
 
+    //  getStream 方法
     @Override
     public Flux<String> getStream(String id) {
-        //权限校验
-        Map<String, Object> map = ThreadLocalUtil.get();
-        Integer userId = (Integer) map.get("id");
-        //是否验证
-        if (!userService.isVaildate(userId)) {
-            return Flux.error(new RuntimeException("用户未验证"));
-        }
-        //是否有权限
-        if (!userTasksMap.containsKey(userId) || !userTasksMap.get(userId).contains(id)) {
-            return Flux.error(new RuntimeException("无权限"));
-        }
-        return aiClientUtil.getChatStream(id);
+        return Flux.defer(() -> {
+            Map<String, Object> map = ThreadLocalUtil.get();
+            Integer userId = (Integer) map.get("id");
+
+            // 使用RuntimeException替代特定异常
+            if (!userService.isVaildate(userId)) {
+                return Flux.error(new RuntimeException("用户未通过验证"));
+            }
+
+            Set<String> tasks = userTasksMap.getOrDefault(userId, Collections.emptySet());
+            if (!tasks.contains(id)) {
+                return Flux.error(new RuntimeException("无访问权限"));
+            }
+
+            return aiClientUtil.getChatStream(id)
+                    .doFinally(signal -> {
+                        if (signal == SignalType.CANCEL ||
+                                signal == SignalType.ON_ERROR) {
+                            stopChat(id);
+                        }
+                    });
+        });
     }
+
+
 
     @Override
     public void stopChat(String id) {

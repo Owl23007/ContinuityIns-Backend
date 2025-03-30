@@ -24,7 +24,7 @@ public interface UserService {
 
     Result deleteAccount(String password);
 
-    Result<Map<String, String>> getOssPolicy();
+    Result<Map<String, Object>> getOssPolicy(String type);
 
     Result sendResetEmail(String email);
 

@@ -1,69 +1,109 @@
 package org.ContinuityIns.utils;
 
-import com.aliyun.oss.ClientException;
+
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.OSSException;
-import com.aliyun.oss.model.MatchMode;
-import com.aliyun.oss.model.PolicyConditions;
-import com.aliyun.oss.model.PutObjectRequest;
-import com.aliyun.oss.model.PutObjectResult;
-import jakarta.websocket.Endpoint;
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.auth.sts.AssumeRoleRequest;
+import com.aliyuncs.auth.sts.AssumeRoleResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.profile.DefaultProfile;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class AliOssUtil {
+
     @Value("${aliyun.oss.endpoint}")
-    private  String endPoint;
+    private String endPoint;
 
     @Value("${aliyun.oss.bucketName}")
-    private  String bucketName;
+    private String bucketName;
 
     @Value("${aliyun.oss.accessKeyId}")
-    private  String accessKeyId;
+    private String accessKeyId;
 
     @Value("${aliyun.oss.accessKeySecret}")
-    private  String accessKeySecret;
+    private String accessKeySecret;
+    @Value("${aliyun.oss.roleArn}")
+    private String roleArn;
 
+    private OSS ossClient;
+    private DefaultAcsClient stsClient;
 
-    // 节点域名
-    private  final String EndPoint = endPoint;
-    // 存储空间名
-    private  final String Bucket_Name = bucketName;
-    // 访问密钥id
-    private  final String ACCESS_KEY_ID = accessKeyId;
-    // 访问密钥key
-    private  final String ACCESS_KEY_SECRET = accessKeySecret;
+    @PostConstruct
+    public void init() {
+        ossClient = new OSSClientBuilder().build(endPoint, accessKeyId, accessKeySecret);
+        stsClient = new DefaultAcsClient(
+                DefaultProfile.getProfile("cn-shenzhen", accessKeyId, accessKeySecret)
+        );
+    }
 
-    public Map<String, String> generatePolicy(String dir, long maxSize) {
-        // 创建OSSClient实例
-        OSS ossClient = new OSSClientBuilder().build(endPoint, accessKeyId, accessKeySecret);
+    /**
+     * 获取STS Token
+     *
+     * @param path    上传路径
+     * @param maxSize 文件大小限制
+     * @return STS Token
+     */
+    public Map<String, Object> getSTSToken(String path,int maxSize) {
         try {
-            long expireTime = 30; // 30分钟过期
-            long expireEndTime = System.currentTimeMillis() + expireTime * 60 * 1000;
-            Date expiration = new Date(expireEndTime);
+            // 1. 创建AssumeRole请求
+            AssumeRoleRequest request = new AssumeRoleRequest();
+            request.setRoleArn(roleArn);
+            request.setRoleSessionName("aliyun_oss_session");
+            request.setDurationSeconds(3600L);
 
-            PolicyConditions policyConditions = new PolicyConditions();
-            policyConditions.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, maxSize);
-            policyConditions.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir);
-            String postPolicy = ossClient.generatePostPolicy(expiration, policyConditions);
-            String signature = ossClient.calculatePostSignature(postPolicy);
+            // 2. 调用阿里云STS服务获取凭证
+            AssumeRoleResponse response = stsClient.getAcsResponse(request);
+            AssumeRoleResponse.Credentials credentials = response.getCredentials();
 
-            Map<String, String> respMap = new HashMap<>();
-            respMap.put("accessid", accessKeyId);
-            respMap.put("policy", postPolicy);
-            respMap.put("signature", signature);
-            respMap.put("dir", dir);
-            respMap.put("host", "https://" + bucketName + "." + endPoint);
-            respMap.put("expire", String.valueOf(expireEndTime / 1000));
-            return respMap;
-        } finally {
+            log.debug("STS Token生成成功{}", credentials.getAccessKeyId());
+
+            // 3. 构建返回结果
+            return getObjectMap(path, maxSize, credentials);
+
+        } catch (ClientException e) {
+            // 记录详细错误信息
+            log.error("STS Token生成失败: {}", e.getMessage(), e);
+            throw new RuntimeException("STS凭证生成失败，请检查阿里云配置", e);
+        }
+    }
+
+    /**
+     * 获取上传文件的参数
+     *
+     * @param path     上传路径
+     * @param maxSize  文件大小限制
+     * @param credentials STS凭证
+     * @return 参数Map
+     */
+    private Map<String, Object> getObjectMap(String path, int maxSize, AssumeRoleResponse.Credentials credentials) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("accessKeyId", credentials.getAccessKeyId());
+        result.put("accessKeySecret", credentials.getAccessKeySecret());
+        result.put("securityToken", credentials.getSecurityToken());
+        result.put("expiration", credentials.getExpiration());
+        result.put("path", path);
+        result.put("maxSize", maxSize);
+        result.put("bucketName", bucketName);
+        result.put("endPoint", endPoint);
+        return result;
+    }
+
+
+    @PreDestroy
+    public void destroy() {
+        if (ossClient != null) {
             ossClient.shutdown();
         }
     }

@@ -28,4 +28,15 @@ public class JwtUtil {
                 .asMap();
     }
 
+    public static boolean validateToken(String token) {
+        try {
+            JWT.require(Algorithm.HMAC256(KEY))
+                .build()
+                .verify(token);
+            return true;
+        } catch (Exception e) {
+            // Token验证失败
+            return false;
+        }
+    }
 }

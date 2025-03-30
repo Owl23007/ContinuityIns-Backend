@@ -61,37 +61,6 @@ CREATE TABLE user_tokens (
                              CONSTRAINT fk_user_tokens_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 视频表（status 中新增 PENDING 表示等待审核）
-CREATE TABLE videos (
-                        video_id INT AUTO_INCREMENT PRIMARY KEY,
-                        user_id INT NOT NULL,
-                        title VARCHAR(255) NOT NULL,
-                        video_url VARCHAR(255) NOT NULL,
-                        cover_image VARCHAR(255),
-                        description TEXT,
-                        status ENUM('DRAFT', 'PENDING', 'PUBLISHED', 'BANNED') NOT NULL DEFAULT 'DRAFT',
-                        duration INT NOT NULL,
-                        create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        CONSTRAINT fk_videos_user FOREIGN KEY (user_id) REFERENCES users(user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 视频的浏览记录
-CREATE TABLE video_view_records (
-                                    id INT AUTO_INCREMENT PRIMARY KEY,
-                                    video_id INT NOT NULL,
-                                    user_id INT NOT NULL,
-                                    view_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                    is_starred BOOLEAN DEFAULT FALSE,
-                                    is_liked BOOLEAN DEFAULT FALSE,
-                                    is_ignored BOOLEAN DEFAULT FALSE,
-                                    CONSTRAINT fk_vvr_video FOREIGN KEY (video_id) REFERENCES videos(video_id),
-                                    CONSTRAINT fk_vvr_user FOREIGN KEY (user_id) REFERENCES users(user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE INDEX idx_video_view ON video_view_records(user_id, video_id);
-
 -- 评论表（增加待审核状态）
 CREATE TABLE comments (
                           comment_id INT AUTO_INCREMENT PRIMARY KEY,

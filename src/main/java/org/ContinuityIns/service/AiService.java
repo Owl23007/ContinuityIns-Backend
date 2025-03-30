@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Flux;
 
 public interface AiService {
-    String create(JsonNode message);
+    String create(JsonNode message, String model);
     Flux<String> getStream(String id);
     void stopChat(String id);
 }
