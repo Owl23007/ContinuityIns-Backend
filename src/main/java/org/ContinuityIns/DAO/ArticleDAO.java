@@ -1,20 +1,20 @@
-package org.ContinuityIns.DTO;
+package org.ContinuityIns.DAO;
 
 import lombok.Data;
 
 @Data
-public class ArticleDTO {
+public class ArticleDAO {
     private Long articleId;
     private String title;
-    private Long userId;
-    private String nickname;
+    private Integer userId;
+    private String username;
     private String content;
     private String coverImage;
     private ArticleStatus status;
-    private Integer duration;
+    private Integer duration;// 文章字数
     private String createTime;
 
-    enum ArticleStatus {
+    public enum ArticleStatus {
         PUBLISHED, DRAFT, BANNED, PRIVATE
     }
 }

@@ -6,7 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.ContinuityIns.mapper.TokenMapper;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DTO.UserDTO;
+import org.ContinuityIns.DAO.UserDAO;
 import org.ContinuityIns.service.EmailService;
 import org.ContinuityIns.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailServiceImpl implements EmailService {
-
     @Autowired
     private JavaMailSender mailSender;
 
@@ -49,11 +48,11 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Result verifyRegisterEmail(String email, String token) {
         // 获取用户
-        UserDTO u = userMapper.getUserByEmail(email);
+        UserDAO u = userMapper.getUserByEmail(email);
         if (u == null) {
             return  Result.error("用户不存在或邮件已过期,请先注册");
         }
-        if(u.getStatus().equals(UserDTO.UserStatus.NORMAL)){
+        if(u.getStatus().equals(UserDAO.UserStatus.NORMAL)){
             return Result.error("用户已激活，请勿重复激活");
         }
 
@@ -62,7 +61,7 @@ public class EmailServiceImpl implements EmailService {
         tokenService.verifyToken(u.getUserId(), token);
 
         // 更新用户状态
-        userMapper.updateStatus( u.getUserId(), UserDTO.UserStatus.NORMAL);
+        userMapper.updateStatus( u.getUserId(), UserDAO.UserStatus.NORMAL);
 
         //初始化用户名和签名
         userMapper.init(u.getUserId(), "这个人很懒，什么都没有留下", "存续院用户"+u.getUserId());

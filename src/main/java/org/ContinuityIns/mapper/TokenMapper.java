@@ -1,6 +1,6 @@
 package org.ContinuityIns.mapper;
 
-import org.ContinuityIns.DTO.UserTokenDTO;
+import org.ContinuityIns.DAO.UserTokenDAO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -12,7 +12,7 @@ public interface TokenMapper {
     void insertToken(int userId, String token);
 
     @Select("SELECT * FROM user_tokens WHERE user_id = #{userId}")
-    UserTokenDTO getToken(int userId);
+    UserTokenDAO getToken(int userId);
 
     @Delete("DELETE FROM user_tokens WHERE user_id = #{userId}")
     void deleteToken(int userId);

@@ -28,10 +28,10 @@ public class AiChatController {
 
     // 修改后的startChat方法（关键修改点说明）
     @PostMapping("/chat")
-    public Result<String> startChat(@RequestBody String requestBody) { // 改为接收完整请求体
+    public Result<String> startChat(@RequestBody String requestBody) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(requestBody); // 解析完整请求体
+            JsonNode rootNode = objectMapper.readTree(requestBody); // 解析请求体
 
             // 提取messages和model节点
             JsonNode messagesNode = rootNode.get("messages");

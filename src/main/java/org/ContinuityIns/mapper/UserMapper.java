@@ -1,6 +1,6 @@
 package org.ContinuityIns.mapper;
 
-import org.ContinuityIns.DTO.UserDTO;
+import org.ContinuityIns.DAO.UserDAO;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -23,15 +23,15 @@ public interface UserMapper {
 
     // 根据用户id查询用户
     @Select("SELECT * FROM users WHERE user_id = #{userId}")
-    UserDTO getUserById(@Param("userId") Integer userId);
+    UserDAO getUserById(@Param("userId") Integer userId);
 
     // 根据用户名查询用户
     @Select("SELECT * FROM users WHERE username = #{username}")
-    UserDTO getUserByUsername(@Param("username") String username);
+    UserDAO getUserByUsername(@Param("username") String username);
 
     // 根据邮箱查询用户
     @Select("SELECT * FROM users WHERE email = #{email}")
-    UserDTO getUserByEmail(@Param("email") String email);
+    UserDAO getUserByEmail(@Param("email") String email);
 
     // 更新用户信息
     @Update("UPDATE users SET  signature = #{signature}, nickname = #{nickname}, update_time = NOW() WHERE user_id = #{userId}")
@@ -42,12 +42,17 @@ public interface UserMapper {
     // 更新用户状态
     @Update("UPDATE users SET status = #{status}, update_time = NOW() WHERE user_id = #{id}")
     void updateStatus(@Param("id") Integer id,
-                      @Param("status") UserDTO.UserStatus status);
+                      @Param("status") UserDAO.UserStatus status);
 
     // 更新用户头像
     @Update("UPDATE users SET avatar_image = #{url}, update_time = NOW() WHERE user_id = #{id}")
     void updateAvatar(@Param("id") Integer id,
                       @Param("url") String url);
+
+    // 更新用户背景图
+    @Update("UPDATE users SET background_image = #{url}, update_time = NOW() WHERE user_id = #{id}")
+    void updateBackground(@Param("id") Integer id,
+                          @Param("url") String url);
 
     // 更新用户密码
     @Update("UPDATE users SET encr_password = #{rsaPassword}, salt = #{salt}, update_time = NOW() WHERE user_id = #{id}")

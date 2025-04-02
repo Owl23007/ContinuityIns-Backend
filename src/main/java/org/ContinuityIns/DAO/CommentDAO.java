@@ -1,11 +1,11 @@
-package org.ContinuityIns.DTO;
+package org.ContinuityIns.DAO;
 
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class CommentDTO {
+public class CommentDAO {
     private Long commentId;
     private Long userId;
     private String nickname;
@@ -14,7 +14,7 @@ public class CommentDTO {
     private CommentStatus status;
     private Long parentId;
     private TargetType targetType;
-    private List<CommentDTO> replies;
+    private List<CommentDAO> replies;
 
 
     enum CommentStatus {

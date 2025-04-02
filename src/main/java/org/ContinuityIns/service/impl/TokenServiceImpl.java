@@ -2,7 +2,7 @@ package org.ContinuityIns.service.impl;
 
 import org.ContinuityIns.mapper.TokenMapper;
 import org.ContinuityIns.mapper.UserMapper;
-import org.ContinuityIns.DTO.UserTokenDTO;
+import org.ContinuityIns.DAO.UserTokenDAO;
 import org.ContinuityIns.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class TokenServiceImpl implements TokenService {
             return;
         }
         //判断是否已经存在token
-        UserTokenDTO databaseToken = tokenMapper.getToken(userId);
+        UserTokenDAO databaseToken = tokenMapper.getToken(userId);
         if (databaseToken != null) {
             tokenMapper.deleteToken(userId);
         }
@@ -34,7 +34,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Boolean verifyToken(Integer userId, String token) {
-        UserTokenDTO databaseToken = tokenMapper.getToken(userId);
+        UserTokenDAO databaseToken = tokenMapper.getToken(userId);
         if (databaseToken == null) {
             return false;
         }

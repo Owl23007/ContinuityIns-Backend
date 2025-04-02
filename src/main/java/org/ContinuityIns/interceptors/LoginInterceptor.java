@@ -1,7 +1,5 @@
 package org.ContinuityIns.interceptors;
 
-import jakarta.validation.constraints.NotNull;
-import org.ContinuityIns.DTO.UserDTO;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.service.UserService;
 import org.ContinuityIns.utils.JwtUtil;

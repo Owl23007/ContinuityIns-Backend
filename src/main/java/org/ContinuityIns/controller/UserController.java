@@ -1,13 +1,8 @@
 package org.ContinuityIns.controller;
 
-import com.aliyun.oss.OSSClient;
-import com.aliyuncs.DefaultAcsClient;
-import com.aliyuncs.auth.sts.AssumeRoleRequest;
-import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DTO.UserDTO;
+import org.ContinuityIns.DAO.UserDAO;
 import org.ContinuityIns.service.UserService;
-import org.ContinuityIns.utils.AliOssUtil;
 import org.ContinuityIns.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -45,12 +40,12 @@ public class UserController {
     }
 
     @GetMapping("/userinfo")
-    public Result<UserDTO> onUserInfo() {
+    public Result<UserDAO> onUserInfo() {
         return userService.getUserInfo();
     }
 
     @GetMapping("/userinfoById")
-    public Result<UserDTO> onUserInfoById(@RequestParam Integer userId) {
+    public Result<UserDAO> onUserInfoById(@RequestParam Integer userId) {
         return userService.getUserInfoById(userId);
     }
 
@@ -62,6 +57,11 @@ public class UserController {
     @PatchMapping("/updateAvatar")
     public Result onUpdateAvatar(@RequestParam String url) {
         return userService.updateAvatar(url);
+    }
+
+    @PatchMapping("/updateBackground")
+    public Result onUpdateBackground(@RequestParam String url) {
+        return userService.updateBackground(url);
     }
 
     @PatchMapping("/updatePassword")
@@ -100,5 +100,10 @@ public class UserController {
         } else {
             return Result.error("Token无效或已过期");
         }
+    }
+
+    @GetMapping("/{id}")
+    public Result<UserDAO> getUserById(@PathVariable("id") Integer id) {
+        return userService.getUserInfoById(id);
     }
 }

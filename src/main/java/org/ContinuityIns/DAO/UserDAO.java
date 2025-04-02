@@ -1,15 +1,16 @@
-package org.ContinuityIns.DTO;
+package org.ContinuityIns.DAO;
 
 import lombok.Data;
 
 
 @Data
-public class UserDTO {
+public class UserDAO {
     private Integer userId;
     private String username;
     private String nickname;
     private String signature;
     private String avatarImage;
+    private String backgroundImage;
     private UserStatus status;
     private String email;
 

@@ -1,6 +1,6 @@
 package org.ContinuityIns.controller;
 
-import org.ContinuityIns.DTO.CommentDTO;
+import org.ContinuityIns.DAO.CommentDAO;
 import org.ContinuityIns.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +22,8 @@ public class CommentController {
 
     // 添加评论
     @PostMapping
-    public void addComment(@RequestBody CommentDTO commentDTO) {
-        commentService.addComment(commentDTO);
+    public void addComment(@RequestBody CommentDAO commentDAO) {
+        commentService.addComment(commentDAO);
     }
 
     // 删除评论
@@ -46,7 +46,7 @@ public class CommentController {
 
     // 获取评论列表
     @GetMapping("/list")
-    public List<CommentDTO> getCommentList(@RequestParam Integer id, @RequestParam String type) {
+    public List<CommentDAO> getCommentList(@RequestParam Integer id, @RequestParam String type) {
         return commentService.getCommentList(type, id);
     }
 }

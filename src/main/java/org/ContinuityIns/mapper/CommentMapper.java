@@ -1,7 +1,7 @@
 package org.ContinuityIns.mapper;
 
 
-import org.ContinuityIns.DTO.CommentDTO;
+import org.ContinuityIns.DAO.CommentDAO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -11,11 +11,11 @@ public interface CommentMapper {
 
     //添加评论
     @Insert("insert into comments (user_id,content,target_type,target_id) values (#{userId},#{comment},#{TargetType},#{ParentId})")
-    void addComment(CommentDTO comment);
+    void addComment(CommentDAO comment);
 
     //修改评论内容
     @Update("update comments set content = #{comment} where comment_id = #{CommentId}")
-    void UpdateCommentContent(CommentDTO comment);
+    void UpdateCommentContent(CommentDAO comment);
 
     //删除评论
     @Update("update comments set status = '删除' where comment_id = #{CommentId}")
@@ -23,7 +23,7 @@ public interface CommentMapper {
 
     //获取评论列表
     @Select("select * from comments where target_type = #{TargetType} and target_id = #{TargetId}")
-    List<CommentDTO> getCommentList(String TargetType, int TargetId);
+    List<CommentDAO> getCommentList(String TargetType, int TargetId);
 
     //获取评论数据
     @Select("select * from comments where comment_id = #{CommentId}")

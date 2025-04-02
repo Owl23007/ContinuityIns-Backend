@@ -12,6 +12,7 @@ CREATE TABLE users (
                        nickname VARCHAR(255) NOT NULL,
                        signature VARCHAR(255) NOT NULL,
                        avatar_image VARCHAR(255),
+                       background_image VARCHAR(255),
                        email VARCHAR(255) NOT NULL UNIQUE,
                        encr_password VARCHAR(255) NOT NULL,
                        salt VARCHAR(255) NOT NULL,
@@ -19,6 +20,9 @@ CREATE TABLE users (
                        create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE users MODIFY COLUMN user_id INT AUTO_INCREMENT;
+ALTER TABLE users AUTO_INCREMENT = 100001;
 
 -- 文章表（增加审核机制，可以在业务逻辑中对 status 进行复合控制）
 CREATE TABLE articles (
@@ -61,13 +65,25 @@ CREATE TABLE user_tokens (
                              CONSTRAINT fk_user_tokens_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 邮箱验证码表
+-- 删除现有的外键约束（如果存在）
+ALTER TABLE user_tokens DROP FOREIGN KEY fk_user_tokens_user;
+
+-- 重新创建外键约束，并设置ON DELETE CASCADE
+ALTER TABLE user_tokens
+    ADD CONSTRAINT fk_user_tokens_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE;
+
+
 -- 评论表（增加待审核状态）
 CREATE TABLE comments (
                           comment_id INT AUTO_INCREMENT PRIMARY KEY,
                           user_id INT NOT NULL,
                           content TEXT NOT NULL,
                           target_id INT NOT NULL,
-                          target_type ENUM('ARTICLE', 'VIDEO', 'COMMENT') NOT NULL,
+                          target_type ENUM('ARTICLE', 'COMMENT') NOT NULL,
                           status ENUM('PENDING', 'PUBLISHED', 'BANNED', 'DELETED') NOT NULL DEFAULT 'PENDING',
                           create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                           update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -97,3 +113,23 @@ CREATE TABLE audit_logs (
                             INDEX idx_audit (table_name, record_id),
                             CONSTRAINT fk_audit_user FOREIGN KEY (performed_by) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tag表
+CREATE TABLE tags (
+                      tag_id INT AUTO_INCREMENT PRIMARY KEY,
+                      tag_name VARCHAR(255) NOT NULL,
+                      user_id INT NOT NULL,
+                      status ENUM('ACTIVE', 'BANNED') NOT NULL DEFAULT 'ACTIVE',
+                      create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 文章标签关系表
+CREATE TABLE tag_articles (
+                             tag_id INT NOT NULL,
+                             article_id INT NOT NULL,
+                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             PRIMARY KEY (tag_id, article_id),
+                             FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE,
+                             FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE
+);
+

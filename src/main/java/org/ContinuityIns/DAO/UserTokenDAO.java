@@ -1,4 +1,4 @@
-package org.ContinuityIns.DTO;
+package org.ContinuityIns.DAO;
 
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Data
-public class UserTokenDTO {
+public class UserTokenDAO {
     private Integer userId;
 
     private String token;

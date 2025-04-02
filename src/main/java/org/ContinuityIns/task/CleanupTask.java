@@ -9,13 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class CleanupTask {
     @Autowired
-    private TokenMapper tokenMapper;
-    @Autowired
     private UserMapper userMapper;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void cleanUpUnverifiedTokens() {
-        tokenMapper.deleteExpiredTokens();
         userMapper.deleteUnverifiedUsers();
     }
 }

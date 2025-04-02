@@ -1,10 +1,12 @@
 package org.ContinuityIns.service;
 
+import org.ContinuityIns.DAO.UserDAO;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DTO.UserDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+@Service
 public interface UserService {
     Result register(String username, String email, String password);
 
@@ -12,13 +14,15 @@ public interface UserService {
 
     Result<String> login(String identifier, String password);
 
-    Result<UserDTO> getUserInfo();
+    Result<UserDAO> getUserInfo();
 
     Result getUserInfoById(Integer userId);
 
     Result updateUserInfo(String nickname, String signature);
 
     Result updateAvatar(String url);
+
+    Result updateBackground(String url);
 
     Result updatePassword(Map<String, String> params);
 
