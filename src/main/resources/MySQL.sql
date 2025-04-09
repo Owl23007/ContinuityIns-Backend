@@ -132,4 +132,3 @@ CREATE TABLE tag_articles (
                              FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE,
                              FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE
 );
-
