@@ -2,7 +2,6 @@ package org.ContinuityIns.DAO;
 
 import lombok.Data;
 
-
 @Data
 public class UserDAO {
     private Integer userId;

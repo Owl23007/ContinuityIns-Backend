@@ -84,7 +84,6 @@
 			<version>${aliyun.sdk.oss.version}</version>
 		</dependency>
 
-		<!-- Actuator for monitoring and management -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -106,6 +105,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+			<version> 3.3.3</version>
 		</dependency>
 
 		<dependency>
