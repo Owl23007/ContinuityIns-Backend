@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -34,6 +35,24 @@ public class FollowerController {
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer followerId = (Integer) map.get("id");
         followService.addFollower(followerId,userId);
+        return Result.success();
+    }
+    @GetMapping("/query")
+    public Result queryFollowers(){
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer followerId = (Integer) map.get("id");
+        List<UserDAO> userDAOList = followService.selectFollowingsByUserId(followerId);
+        return Result.success(userDAOList);
+    }
+    @GetMapping("/delete")
+    public Result deleteFollower(@RequestParam Integer userId){
+        UserDAO userDAO = userMapper.getUserById(userId);
+        if (userDAO == null){
+            return Result.error("用户不存在");
+        }
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer followerId = (Integer) map.get("id");
+        followService.deleteFollower(followerId,userId);
         return Result.success();
     }
 }
