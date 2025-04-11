@@ -21,7 +21,7 @@
 
 	<!-- Properties -->
 	<properties>
-		<java.version> 23</java.version>
+		<java.version>21</java.version>
 		<mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
 		<auth0.java-jwt.version>4.4.0</auth0.java-jwt.version>
 		<aliyun.sdk.oss.version>3.17.4</aliyun.sdk.oss.version>
@@ -111,6 +111,13 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+		</dependency>
+
+		<!--easy-captcha-->
+		<dependency>
+			<groupId>com.github.whvcse</groupId>
+			<artifactId>easy-captcha</artifactId>
+			<version> 1.6.2</version>
 		</dependency>
 	</dependencies>
 

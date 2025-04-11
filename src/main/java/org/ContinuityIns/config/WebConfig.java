@@ -27,7 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
         // 如果有其他不需要拦截的接口，可以在这里添加
         registry.addInterceptor(loginInterceptor).excludePathPatterns("/user/login",
                 "/user/register","/article/daily","/user/active","/user/sendResetEmail",
-                "/user/resetPassword");
+                "/user/resetPassword","/auth/captcha","/auth/verify-captcha");
     }
 
 }

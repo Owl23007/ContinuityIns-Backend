@@ -3,6 +3,7 @@ package org.ContinuityIns.controller;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DAO.UserDAO;
 import org.ContinuityIns.service.UserService;
+import org.ContinuityIns.utils.CaptchaUtil;
 import org.ContinuityIns.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +26,13 @@ public class UserController {
     public Result onRegister(@Pattern(regexp ="^[a-zA-Z0-9]{5,16}$")String username,
                              //5-16位英文数字组合
                              @Email String email,
-                             @NotNull String password) {
+                             @NotNull String password,
+                             @NotNull String captchaId,
+                             @NotNull String captchaCode) {
+        boolean isValid = CaptchaUtil.verify(captchaCode, captchaId);
+        if (!isValid) {
+            return Result.error("验证码验证失败");
+        }
         return userService.register(username, email, password);
     }
 

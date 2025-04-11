@@ -80,6 +80,8 @@ public class ArticleServiceImpl implements ArticleService {
         if (articleDAO == null || articleDAO.getArticleId() == null || articleDAO.getArticleId() <= 0) {
             return Result.error("无效的文章数据");
         }
+        articleDAO.setUserId((Integer) ThreadLocalUtil.get().get("id"));
+        articleDAO.setDuration(articleDAO.getContent().length());
         int rowsAffected = articleMapper.updateArticle(articleDAO);
         if (rowsAffected > 0) {
             return Result.success("文章更新成功");
