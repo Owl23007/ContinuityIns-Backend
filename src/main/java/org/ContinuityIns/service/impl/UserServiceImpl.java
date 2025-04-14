@@ -133,8 +133,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<String> activateAccount(String email, String token) {
-        emailService.verifyRegisterEmail(email, token);
-        return Result.success("激活成功");
+        Result result = emailService.verifyRegisterEmail(email, token);
+        return result;
     }
 
     @Override

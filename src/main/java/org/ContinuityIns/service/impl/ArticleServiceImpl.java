@@ -3,6 +3,7 @@ package org.ContinuityIns.service.impl;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DAO.ArticleDAO;
 import org.ContinuityIns.mapper.ArticleMapper;
+import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.service.ArticleService;
 import org.ContinuityIns.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ArticleMapper articleMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public Result createArticle(ArticleDAO articleDAO) {
@@ -34,18 +37,33 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result<List<ArticleDAO>> getArticleListBySelf() {
-        Integer userId = (Integer) ThreadLocalUtil.get().get("id");
-        String username = (String) ThreadLocalUtil.get().get("username");
+    public Result<List<ArticleDAO>> getArticleProfileList(Integer userId) {
+        if (userId == 0 || userId == null) {
+            userId = (Integer) ThreadLocalUtil.get().get("id");
+        }
+
         List<ArticleDAO> articles = articleMapper.selectArticlesByUser(userId);
+
+        // 过滤掉非Published状态的文章
+        articles.removeIf(article -> !article.getStatus().equals(ArticleDAO.ArticleStatus.PUBLISHED));
+        //获取最新的10篇文章
+        articles = articles.subList(0, Math.min(articles.size(), 10));
         // 只保留文本前20个字符
         for (ArticleDAO article : articles) {
             String content = article.getContent();
             if (content.length() > 20) {
                 article.setContent(content.substring(0, 20)+"...");
             }
+            String username = userMapper.getUserById(article.getUserId()).getUsername();
             article.setUsername(username);
         }
+        // 添加文章浏览数据
+        articles.forEach(article -> {
+            article.setViewCount(article.getViewCount());
+            article.setLikeCount(article.getLikeCount());
+            article.setCommentCount(article.getCommentCount());
+            article.setCollectionCount(article.getCollectionCount());
+        });
         return Result.success(articles);
     }
 

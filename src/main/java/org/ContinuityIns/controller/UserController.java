@@ -1,5 +1,6 @@
 package org.ContinuityIns.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DAO.UserDAO;
 import org.ContinuityIns.service.UserService;
@@ -100,7 +101,12 @@ public class UserController {
     }
 
     @PostMapping("/validateToken")
-    public Result validateToken(@RequestParam String token) {
+    public Result validateToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return Result.error("Token为空");
+        }
+        token = token.substring(5);
         boolean isValid = JwtUtil.validateToken(token);
         if (isValid) {
             return Result.success("Token验证成功");

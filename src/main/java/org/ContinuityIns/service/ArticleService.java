@@ -18,7 +18,7 @@ public interface ArticleService {
     Result createArticle(ArticleDAO articleDAO);
 
     // 获取当前用户的文章列表
-    Result<List<ArticleDAO>> getArticleListBySelf();
+    Result<List<ArticleDAO>> getArticleProfileList(Integer userId);
 
     // 更新文章状态
     Result updateArticleStatus(int articleId, String status);

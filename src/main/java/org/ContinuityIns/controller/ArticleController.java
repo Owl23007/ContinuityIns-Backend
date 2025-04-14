@@ -18,9 +18,9 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @GetMapping("/mine")
-    public Result<List<ArticleDAO>> getMyArticle() {
-        return articleService.getArticleListBySelf();
+    @GetMapping("/profile")
+    public Result<List<ArticleDAO>> getMyArticle(Integer userId) {
+        return articleService.getArticleProfileList(userId);
     }
 
     @GetMapping("/{id}")

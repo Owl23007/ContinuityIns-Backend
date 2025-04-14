@@ -14,6 +14,11 @@ public class ArticleDAO {
     private Integer duration;// 文章字数
     private String createTime;
 
+    private Integer viewCount;
+    private Integer likeCount;
+    private Integer commentCount;
+    private Integer collectionCount;
+
     public enum ArticleStatus {
         PUBLISHED, DRAFT, BANNED, PRIVATE
     }
