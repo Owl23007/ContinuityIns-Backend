@@ -3,8 +3,12 @@ package org.ContinuityIns.config;
 import org.ContinuityIns.interceptors.LoginInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 
 // Web配置类
@@ -29,5 +33,6 @@ public class WebConfig implements WebMvcConfigurer {
                 "/user/register","/article/daily","/user/active","/user/sendResetEmail",
                 "/user/resetPassword","/auth/captcha","/auth/verify-captcha");
     }
+
 
 }

@@ -1,6 +1,7 @@
 package org.ContinuityIns.service;
 
 import org.ContinuityIns.DAO.ArticleDAO;
+import org.ContinuityIns.DAO.CategoryDAO;
 import org.ContinuityIns.common.Result;
 import org.springframework.stereotype.Service;
 
@@ -103,4 +104,6 @@ public interface ArticleService {
      * @return 是否有编辑权限
      */
     Result<Boolean> checkEditPermission(Integer articleId, Integer userId);
+
+    Result<List<CategoryDAO>> getCategories();
 }
