@@ -336,6 +336,11 @@ public class ArticleServiceImpl implements ArticleService {
             
             // 获取文章列表
             List<ArticleDAO> articles = articleMapper.selectUserArticles(userId, status, offset, pageSize);
+
+            for (ArticleDAO article : articles)
+            {
+
+            }
             
             // 获取总记录数
             int total = articleMapper.selectUserArticlesCount(userId, status);

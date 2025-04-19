@@ -132,6 +132,7 @@ public class AliOssUtil {
             result.put("policy", encodedPolicy);
             result.put("signature", signature);
             result.put("dir", dir);
+            result.put("fileName", fileName);
             result.put("host", "https://" + bucketName + "." + endPoint);
             result.put("expire", String.valueOf(expiration.getTime()));
 
