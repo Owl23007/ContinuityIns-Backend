@@ -47,6 +47,12 @@ public class UserDAO {
     }
 
     public long getTokenExpirationToLong() {
-        return tokenExpiration.toEpochSecond(ZoneOffset.ofHours(8));
+        if (tokenExpiration == null) {
+            return 0;
+        } else {
+            return tokenExpiration.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        }
+
+
     }
 }
