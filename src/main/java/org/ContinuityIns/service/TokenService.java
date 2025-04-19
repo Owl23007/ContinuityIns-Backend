@@ -1,10 +1,18 @@
 package org.ContinuityIns.service;
 
-import org.springframework.stereotype.Service;
-
-@Service
 public interface TokenService {
-    void insertToken(Integer userId);
+    /**
+     * 生成token
+     * @param userId 用户ID
+     * @return 生成的token
+     */
+    String generateToken(Integer userId);
 
-    Boolean verifyToken(Integer userId, String token);
+    /**
+     * 验证token
+     *@param  email 用户邮箱
+     * @param  token 激活token
+     * @return 生成的token
+     */
+    Boolean verifyToken( String email, String token);
 }

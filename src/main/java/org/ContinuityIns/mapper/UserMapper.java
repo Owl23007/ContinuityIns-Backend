@@ -3,6 +3,8 @@ package org.ContinuityIns.mapper;
 import org.ContinuityIns.DAO.UserDAO;
 import org.apache.ibatis.annotations.*;
 
+import java.util.Date;
+
 @Mapper
 public interface UserMapper {
 
@@ -64,10 +66,9 @@ public interface UserMapper {
     @Update("UPDATE users SET status ='DEACTIVATED', username = CONCAT('注销', user_id), email = CONCAT('注销', user_id) ,update_time = NOW() WHERE user_id = #{id}")
     void cancel(@Param("id") Integer id);
 
-
-    // 删除未验证且已删除token的用户
-    @Delete("DELETE FROM users WHERE status = 'UNVERIFIED' AND user_id NOT IN (SELECT user_id FROM user_tokens)")
-    void deleteUnverifiedUsers();
+    // 更新最后登录信息
+    @Update("UPDATE users SET last_login = #{lastLogin}, last_login_ip = #{ip}, update_time = NOW() WHERE user_id = #{userId}")
+    void updateLastLogin(@Param("userId") Integer userId, @Param("lastLogin") java.util.Date lastLogin, @Param("ip") String ip);
 
     // 根据邮箱获取用户名
     @Select("SELECT username FROM users WHERE email = #{identifier}")
@@ -80,4 +81,30 @@ public interface UserMapper {
     // 根据用户id获取用户密码
     @Select("SELECT encr_password FROM users WHERE user_id = #{id}")
     String getEncrPasswordByUserId(@Param("id") Integer id);
+
+    @Insert("INSERT INTO user_settings(user_id, theme, notification_preferences, privacy_settings) " +
+            "VALUES(#{userId}, 'SYSTEM', '{}', '{}')")
+    void initUserSettings(@Param("userId") Integer userId);
+
+    @Update("UPDATE user_settings SET theme = #{theme}, " +
+            "notification_preferences = #{notificationPreferences}, " +
+            "privacy_settings = #{privacySettings}, " +
+            "update_time = NOW() " +
+            "WHERE user_id = #{userId}")
+    void updateUserSettings(@Param("userId") Integer userId,
+                          @Param("theme") String theme,
+                          @Param("notificationPreferences") String notificationPreferences,
+                          @Param("privacySettings") String privacySettings);
+
+    @Select("SELECT u.*, us.theme, us.notification_preferences, us.privacy_settings " +
+            "FROM users u " +
+            "LEFT JOIN user_settings us ON u.user_id = us.user_id " +
+            "WHERE u.user_id = #{userId}")
+    UserDAO getUserWithSettingsById(@Param("userId") Integer userId);
+    
+    @Delete("DELETE FROM users WHERE status = 'UNVERIFIED' AND create_time < DATE_SUB(NOW(), INTERVAL 3 DAY)")
+    void deleteUnverifiedUsers();
+
+    @Update("UPDATE users SET token = #{token}, token_expiration = #{expiryDate} WHERE user_id = #{userId}")
+    void updateToken(Integer userId, String token, Date expiryDate);
 }

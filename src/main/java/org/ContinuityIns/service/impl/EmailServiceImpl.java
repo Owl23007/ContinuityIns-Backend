@@ -3,7 +3,6 @@ package org.ContinuityIns.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.ContinuityIns.mapper.TokenMapper;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DAO.UserDAO;
@@ -20,9 +19,6 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender mailSender;
-
-    @Autowired
-    private TokenMapper tokenMapper;
 
     @Autowired
     private UserMapper userMapper;
@@ -56,9 +52,8 @@ public class EmailServiceImpl implements EmailService {
             return Result.error("用户已激活，请勿重复激活");
         }
 
-
         // 验证token
-        tokenService.verifyToken(u.getUserId(), token);
+        tokenService.verifyToken(email, token);
 
         // 更新用户状态
         userMapper.updateStatus( u.getUserId(), UserDAO.UserStatus.NORMAL);
@@ -68,7 +63,7 @@ public class EmailServiceImpl implements EmailService {
 
 
         // 删除token
-        tokenMapper.deleteToken(u.getUserId());
+        userMapper.updateToken(u.getUserId(), null, null);
 
         return Result.success("激活成功");
     }

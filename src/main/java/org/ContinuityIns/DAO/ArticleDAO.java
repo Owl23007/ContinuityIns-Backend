@@ -4,10 +4,11 @@ import lombok.Data;
 
 @Data
 public class ArticleDAO {
-    private Long articleId;
+    private Integer articleId;
     private String title;
     private Integer userId;
-    private String username;
+    private String nickname;
+    private String avatarImage;
     private String content;
     private String coverImage;
     private ArticleStatus status;

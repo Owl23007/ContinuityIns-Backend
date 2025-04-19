@@ -37,14 +37,50 @@ public class UserController {
         return userService.register(username, email, password);
     }
 
+    /**
+     * 激活账号
+     * @param email 邮箱
+     * @param token 激活token
+     * @return 激活结果
+     */
     @GetMapping("/active")
-    public Result<String> onActive(@RequestParam String email, @RequestParam String token) {
+    public Result<String> onActive(
+            @RequestParam @Email(message = "邮箱格式不正确") String email,
+            @RequestParam @NotNull(message = "激活token不能为空") String token) {
         return userService.activateAccount(email, token);
     }
 
     @PostMapping("/login")
-    public Result<String> onLogin(@NotNull String identifier, @NotNull String password) {
-        return userService.login(identifier, password);
+    public Result<String> onLogin(@NotNull String identifier, @NotNull String password, HttpServletRequest request) {
+        // 获取客户端IP地址
+        String ipAddress = getClientIpAddress(request);
+        return userService.login(identifier, password, ipAddress);
+    }
+
+    // 获取客户端真实IP地址
+    private String getClientIpAddress(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        
+        // 如果是多级代理，取第一个IP地址
+        if (ipAddress != null && ipAddress.contains(",")) {
+            ipAddress = ipAddress.substring(0, ipAddress.indexOf(",")).trim();
+        }
+        return ipAddress;
     }
 
     @GetMapping("/userinfo")
@@ -88,15 +124,30 @@ public class UserController {
         return userService.getOssPolicy(type);
     }
 
+    /**
+     * 发送密码重置邮件
+     * @param email 用户邮箱
+     * @return 发送结果
+     */
     @PostMapping("/sendResetEmail")
-    public Result sendResetEmail(@RequestParam String email) {
+    public Result sendResetEmail(
+            @RequestParam @Email(message = "邮箱格式不正确") String email) {
         return userService.sendResetEmail(email);
     }
 
+    /**
+     * 重置密码
+     * @param email 用户邮箱
+     * @param token 重置密码token
+     * @param password 新密码
+     * @return 重置结果
+     */
     @PostMapping("/resetPassword")
-    public Result resetPassword(@RequestParam String email,
-                                @RequestParam String token,
-                                @RequestParam String password) {
+    public Result resetPassword(
+            @RequestParam @Email(message = "邮箱格式不正确") String email,
+            @RequestParam @NotNull(message = "重置token不能为空") String token,
+            @RequestParam @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*]{8,20}$", 
+                message = "密码必须包含8-20位的字母、数字或特殊字符") String password) {
         return userService.resetPassword(email, token, password);
     }
 

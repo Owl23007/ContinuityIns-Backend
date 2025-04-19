@@ -2,8 +2,6 @@ package org.ContinuityIns.service.impl;
 
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
-import org.ContinuityIns.DAO.UserTokenDAO;
-import org.ContinuityIns.mapper.TokenMapper;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DAO.UserDAO;
@@ -22,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -30,8 +29,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private TokenMapper tokenMapper;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -80,8 +77,17 @@ public class UserServiceImpl implements UserService {
 
         String salt = EncrUtil.getSalt();
         String hashPassword = EncrUtil.getHash(password, salt);
-        userMapper.add(username, email, hashPassword, salt,username);
-        // 发送验证邮件
+        
+        // 使用事务保证用户注册和设置初始化的原子性
+        try {
+            userMapper.add(username, email, hashPassword, salt, username);
+            UserDAO ut = userMapper.getUserByUsername(username);
+            userMapper.initUserSettings(ut.getUserId());
+        } catch (Exception e) {
+            log.error("用户注册发生错误", e);
+            return Result.error("注册失败");
+        }
+        
         return sendActivationEmail(username, email, rootLink);
     }
 
@@ -90,8 +96,10 @@ public class UserServiceImpl implements UserService {
         if (u == null || u.getUserId() == null) {
             return Result.error("用户注册失败");
         }
-        String token = UUID.randomUUID().toString();
-        tokenService.insertToken(u.getUserId());
+        String token = tokenService.generateToken(u.getUserId());
+        if (token == null) {
+            return Result.error("生成验证token失败");
+        }
 
         String htmlContent= String.format(
                 "<div style='font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;'>" +
@@ -133,12 +141,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<String> activateAccount(String email, String token) {
-        Result result = emailService.verifyRegisterEmail(email, token);
-        return result;
+        // 获取用户信息
+        UserDAO user = userMapper.getUserByEmail(email);
+        if (user == null) {
+            return Result.error("账号不存在");
+        }
+
+        // 检查账号状态
+        if (user.getStatus().equals(UserDAO.UserStatus.NORMAL)) {
+            return Result.error("账号已激活");
+        }
+
+        // 验证激活token
+        boolean isVerified = tokenService.verifyToken(email, token);
+        if (!isVerified) {
+            return Result.error("激活链接无效或已过期");
+        }
+
+        // 更新用户状态
+        userMapper.updateStatus(user.getUserId(), UserDAO.UserStatus.NORMAL);
+
+        return Result.success("账号激活成功");
     }
 
     @Override
-    public Result<String> login(String identifier, String password) {
+    public Result<String> login(String identifier, String password, String ipAddress) {
         //public
         String username = identifier.contains("@") ? userMapper.getUsernameByEmail(identifier) : identifier;
         UserDAO loginUser = userMapper.getUserByUsername(username);
@@ -155,6 +182,9 @@ public class UserServiceImpl implements UserService {
         }
         String salt = userMapper.getSaltByUserId(loginUser.getUserId());
         if (Objects.equals(EncrUtil.getHash(password, salt), userMapper.getEncrPasswordByUserId(loginUser.getUserId()))) {
+            // 更新最后登录时间和IP
+            userMapper.updateLastLogin(loginUser.getUserId(), new Date(), ipAddress);
+            
             Map<String, Object> claims = new HashMap<>();
             claims.put("id", loginUser.getUserId());
             claims.put("username", loginUser.getUsername());
@@ -166,17 +196,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<UserDAO> getUserInfo() {
-        //private
         Map<String, Object> map = ThreadLocalUtil.get();
-        String username = (String) map.get("username");
+        Integer userId = (Integer) map.get("id");
 
-        if(!isVaildate((Integer) map.get("id"))){
+        if(!isVaildate(userId)){
             return Result.error("用户状态异常");
         }
-        UserDAO u = userMapper.getUserByUsername(username);
 
-        u.setAvatarImage(aliOssUtil.getCDNUrl(u.getAvatarImage()));
-        u.setBackgroundImage(aliOssUtil.getCDNUrl(u.getBackgroundImage()));
+        UserDAO u = userMapper.getUserWithSettingsById(userId);
+        if (u != null) {
+            u.setAvatarImage(aliOssUtil.getCDNUrl(u.getAvatarImage()));
+            u.setBackgroundImage(aliOssUtil.getCDNUrl(u.getBackgroundImage()));
+        }
         return Result.success(u);
     }
 
@@ -192,16 +223,41 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result updateUserInfo(String nickname, String signature) {
         if (!StringUtils.hasLength(nickname) || !StringUtils.hasLength(signature)) {
-            return Result.error("缺少参数。");
+            return Result.error("缺少参数");
         }
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
-        // 检查用户是否存在且状态正常
+        
         if (!isVaildate(userId)) {
             return Result.error("用户状态异常");
         }
-        userMapper.update(userId, signature, nickname);
-        return Result.success();
+
+        try {
+            userMapper.update(userId, signature, nickname);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("Update user info failed", e);
+            return Result.error("更新失败");
+        }
+    }
+
+    // 新增：更新用户设置
+    @Override
+    public Result updateUserSettings(UserDAO.UserTheme theme, String notificationPreferences, String privacySettings) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer userId = (Integer) map.get("id");
+
+        if (!isVaildate(userId)) {
+            return Result.error("用户状态异常");
+        }
+
+        try {
+            userMapper.updateUserSettings(userId, theme.toString(), notificationPreferences, privacySettings);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("Update user settings failed", e);
+            return Result.error("更新设置失败");
+        }
     }
 
     @Override
@@ -293,8 +349,7 @@ public class UserServiceImpl implements UserService {
         }
 
         //创建新token
-        tokenService.insertToken(userId);
-        String token = tokenMapper.getToken(userId).getToken();
+        String token = tokenService.generateToken(userId);
 
         // 发送注销邮件
         String htmlContent = String.format(
@@ -383,18 +438,19 @@ public class UserServiceImpl implements UserService {
         final int userId = user.getUserId();
         final long currentTime = System.currentTimeMillis();
 
+
+        String token = null;
         try {
             // 检查token是否存在且未过期
-            UserTokenDAO existingToken = tokenMapper.getToken(userId);
+            UserDAO existingToken = userMapper.getUserById(userId);
 
             if (existingToken == null) {
                 // 生成新token
-                tokenService.insertToken(userId);
-            } else if (currentTime - existingToken.getCreateTimeToLong() > 3 * 24 * 60 * 60) {
-                // token创建时间超过3天，删除旧token并生成新token
-                tokenMapper.deleteToken(userId);
-                tokenService.insertToken(userId);
-            }else if (currentTime - existingToken.getCreateTimeToLong() <  60) {
+                token = tokenService.generateToken(userId);
+            } else if (existingToken.getTokenExpirationToLong() - currentTime <  24 * 60 * 60 * 1000) {
+                // token过期时间在24小时之内
+                token = tokenService.generateToken(userId);
+            } else if (existingToken.getTokenExpirationToLong() - currentTime <  60 * 1000) {
                 //60秒内只能发送一次
                 return Result.error("60秒内只能发送一次重置邮件");
             }
@@ -402,8 +458,10 @@ public class UserServiceImpl implements UserService {
             log.error("系统繁忙，请稍后重试", e);
             return Result.error("系统繁忙，请稍后重试");
         }
-        String token = tokenMapper.getToken(userId).getToken();
         String userName = user.getUsername();
+        if (token == null) {
+            return Result.error("生成token失败，请稍后重试");
+        }
         // 构建邮件内容
         try {
             String resetLink = String.format("%s/resetPassword?email=%s&token=%s",
@@ -488,7 +546,7 @@ public class UserServiceImpl implements UserService {
             return Result.error("用户状态异常");
         }
 
-        if (!tokenService.verifyToken(u.getUserId(), token)) {
+        if (!tokenService.verifyToken(email, token)) {
             return Result.error("token验证失败");
         }
 
