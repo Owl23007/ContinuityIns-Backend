@@ -1,9 +1,11 @@
 package org.ContinuityIns.service.impl;
 
+import org.ContinuityIns.DAO.CategoryDAO;
 import org.ContinuityIns.DAO.UserDAO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.DAO.ArticleDAO;
 import org.ContinuityIns.mapper.ArticleMapper;
+import org.ContinuityIns.mapper.CategoryMapper;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.mapper.ViewMapper;
 import org.ContinuityIns.service.ArticleService;
@@ -26,6 +28,8 @@ public class ArticleServiceImpl implements ArticleService {
     private UserMapper userMapper;
     @Autowired
     private ViewMapper viewMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     @Override
     public Result createArticle(ArticleDAO articleDAO) {
@@ -436,5 +440,11 @@ public class ArticleServiceImpl implements ArticleService {
                     articleId, userId, e.getMessage(), e);
             return Result.error("检查编辑权限失败：" + e.getMessage());
         }
+    }
+
+    @Override
+    public Result<List<CategoryDAO>> getCategories() {
+        List<CategoryDAO>categoryDAOS = categoryMapper.selectAll();
+        return Result.success(categoryDAOS);
     }
 }
