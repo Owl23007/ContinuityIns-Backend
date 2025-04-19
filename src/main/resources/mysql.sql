@@ -375,23 +375,6 @@ BEGIN
 END//
 DELIMITER ;
 
--- 添加reply_count字段
-ALTER TABLE comments ADD COLUMN reply_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '回复数';
-
--- 创建回复计数触发器
-DELIMITER //
-CREATE TRIGGER after_reply_insert
-    AFTER INSERT ON comments
-    FOR EACH ROW
-BEGIN
-    IF NEW.target_type = 'COMMENT' AND NEW.status = 'PUBLISHED' THEN
-        UPDATE comments
-        SET reply_count = reply_count + 1
-        WHERE comment_id = NEW.target_id;
-    END IF;
-END//
-DELIMITER ;
-
 -- 优化后的评论回复计数器
 DELIMITER //
 CREATE TRIGGER after_reply_insert

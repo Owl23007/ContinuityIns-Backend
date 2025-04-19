@@ -72,5 +72,29 @@ INSERT INTO users (username, nickname, signature, avatar_image, background_image
 ('kyle_russell', 'Kyle Russell', 'Pilot', NULL, NULL, 'kyle.russell@example.com', 'tMgK9uolCJJtt7Ije7a7n4Wawozhsf3vg372V3eUaIY=', 'f8644d9439874b7087435c9ee5e7acc0', 'NORMAL', '2023-03-10 11:40:00', '2023-03-10 11:40:00'),
 ('erin_griffin', 'Erin Griffin', 'Journalist', NULL, NULL, 'erin.griffin@example.com', 'tMgK9uolCJJtt7Ije7a7n4Wawozhsf3vg372V3eUaIY=', 'f8644d9439874b7087435c9ee5e7acc0', 'NORMAL', '2023-03-11 10:55:00', '2023-03-11 10:55:00');
 
+INSERT INTO users
+(username, nickname, signature, avatar_image, background_image, email, token, token_expiration, encr_password, salt, status, last_login, last_login_ip, create_time)
+VALUES
+-- 普通用户
+('alice_wang', 'Alice', '热爱生活的设计师', 'https://example.com/avatar1.jpg', 'https://example.com/bg1.jpg', 'alice@example.com', 'abcd1234', '2025-05-01 12:00:00', 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'NORMAL', '2025-04-18 20:15:00', '192.168.1.100', '2024-03-01 08:30:00'),
+-- 未验证用户
+('bob_chen', 'Bob', '新注册用户', 'https://example.com/avatar2.jpg', NULL, 'bob@example.com', NULL, NULL, 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'UNVERIFIED', NULL, NULL, '2024-04-10 15:00:00'),
+-- 被封禁用户
+('carol_li', 'Carol', '违规用户', 'https://example.com/avatar3.jpg', 'https://example.com/bg3.jpg', 'carol@example.com', 'expired_token', '2024-12-31 23:59:59', 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'BANNED', '2024-11-05 17:30:00', '10.0.0.50', '2023-09-15 11:20:00'),
+-- 带有特殊字符的用户名
+('david.zhang_007', 'David-Z', '技术宅', 'https://example.com/avatar4.jpg', NULL, 'david.z@example.com', 'valid_token_123', '2025-06-30 00:00:00', 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'NORMAL', '2025-04-17 09:45:00', '24.48.0.1', '2024-01-20 14:10:00');
+
+INSERT INTO users
+(username, nickname, signature, avatar_image, background_image, email, token, token_expiration, encr_password, salt, status, last_login, last_login_ip, create_time)
+VALUES
+-- IPv6地址案例 [[2]][[4]]
+('ethan_dev', '以太', '区块链开发者', 'https://example.com/avatar5.jpg', NULL, 'ethan@dev.com', 'ipv6_token', '2025-07-01 00:00:00', 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'NORMAL', '2025-04-19 08:00:00', '2001:db8::1', '2024-05-05 17:22:00'),
+-- 使用Midjourney风格头像 [[7]]
+('fiona_art', '菲奥娜', 'AI艺术探索者', 'https://example.com/avatar_mj6.jpg', 'https://example.com/bg_art.jpg', 'fiona.art@example.net', NULL, NULL, 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'DEACTIVATED', '2024-12-01 19:00:00', '170.187.142.219', '2023-11-11 11:11:00'),
+-- Faker生成的中文地址 [[9]]
+('grace_travel', '环球客', '走过32个国家的旅行家', 'https://example.com/avatar7.jpg', NULL, 'grace@travel.org', 'expired_token_2024', '2024-01-01 00:00:00', 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'BANNED', '2024-03-15 14:30:00', '2404:6800:4003:c02::65', '2023-08-25 09:00:00'),
+-- 多语言签名案例 [[1]]
+('hiroshi_jp', 'ヒロシ', '日本語/English bilingual', 'https://example.com/avatar8.png', 'https://example.com/bg_jp.jpg', 'hiroshi@example.jp', 'valid_jp_token', '2025-12-31 23:59:59', 'BPUOGKgdUZC8KvF+yzuTjy93HEJYRxOb4IQKrHIFVLE=', 'ca0043cb04c3453996701cf0af7efa56', 'NORMAL', '2025-04-18 23:45:00', '124.156.23.89', '2024-02-28 16:00:00');
+
 
 SELECT * FROM articles WHERE user_id = 100001;
