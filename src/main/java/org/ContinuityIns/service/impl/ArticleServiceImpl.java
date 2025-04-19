@@ -9,6 +9,7 @@ import org.ContinuityIns.mapper.CategoryMapper;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.mapper.ViewMapper;
 import org.ContinuityIns.service.ArticleService;
+import org.ContinuityIns.utils.AliOssUtil;
 import org.ContinuityIns.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,8 @@ public class ArticleServiceImpl implements ArticleService {
     private ViewMapper viewMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private AliOssUtil aliOssUtil;
 
     @Override
     public Result createArticle(ArticleDAO articleDAO) {
@@ -337,10 +340,7 @@ public class ArticleServiceImpl implements ArticleService {
             // 获取文章列表
             List<ArticleDAO> articles = articleMapper.selectUserArticles(userId, status, offset, pageSize);
 
-            for (ArticleDAO article : articles)
-            {
 
-            }
             
             // 获取总记录数
             int total = articleMapper.selectUserArticlesCount(userId, status);
@@ -451,5 +451,37 @@ public class ArticleServiceImpl implements ArticleService {
     public Result<List<CategoryDAO>> getCategories() {
         List<CategoryDAO>categoryDAOS = categoryMapper.selectAll();
         return Result.success(categoryDAOS);
+    }
+
+    @Override
+    public Result<Map<String, Object>> getArticleStats() {
+        try {
+            Map<String, Object> stats = new HashMap<>();
+            
+            // 获取已发布文章总数
+            int publishedCount = articleMapper.selectArticlesCountByStatus(ArticleDAO.ArticleStatus.PUBLISHED.toString());
+            stats.put("publishedCount", publishedCount);
+            
+            // 获取总浏览量
+            int totalViews = articleMapper.selectTotalViewCount();
+            stats.put("totalViews", totalViews);
+            
+            // 获取总点赞数
+            int totalLikes = articleMapper.selectTotalLikeCount();
+            stats.put("totalLikes", totalLikes);
+            
+            // 获取各状态文章数量
+            Map<String, Integer> statusCounts = new HashMap<>();
+            for (ArticleDAO.ArticleStatus status : ArticleDAO.ArticleStatus.values()) {
+                int count = articleMapper.selectArticlesCountByStatus(status.toString());
+                statusCounts.put(status.toString(), count);
+            }
+            stats.put("statusCounts", statusCounts);
+            
+            return Result.success(stats);
+        } catch (Exception e) {
+            log.error("获取文章统计信息失败：", e);
+            return Result.error("获取文章统计信息失败：" + e.getMessage());
+        }
     }
 }

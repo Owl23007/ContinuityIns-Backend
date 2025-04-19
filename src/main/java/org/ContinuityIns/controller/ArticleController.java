@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/article")
@@ -152,5 +153,12 @@ public class ArticleController {
         return articleService.getCategories();
     }
 
-
+    /**
+     * 获取文章统计信息
+     * @return 包含统计信息的结果
+     */
+    @GetMapping("/stats")
+    public Result<Map<String, Object>> getArticleStats() {
+        return articleService.getArticleStats();
+    }
 }

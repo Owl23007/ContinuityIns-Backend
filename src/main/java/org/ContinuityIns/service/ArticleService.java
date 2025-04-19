@@ -106,4 +106,9 @@ public interface ArticleService {
     Result<Boolean> checkEditPermission(Integer articleId, Integer userId);
 
     Result<List<CategoryDAO>> getCategories();
+    /**
+     * 获取文章统计信息
+     * @return 包含统计信息的结果
+     */
+    Result<Map<String, Object>> getArticleStats();
 }

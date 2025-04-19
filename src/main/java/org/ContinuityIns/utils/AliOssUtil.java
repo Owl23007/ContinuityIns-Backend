@@ -135,6 +135,7 @@ public class AliOssUtil {
             result.put("fileName", fileName);
             result.put("host", "https://" + bucketName + "." + endPoint);
             result.put("expire", String.valueOf(expiration.getTime()));
+            result.put("CDNPoint", CDNPoint);
 
             log.debug("Post Policy：{}", result);
             return result;

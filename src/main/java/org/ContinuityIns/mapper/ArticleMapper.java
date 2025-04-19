@@ -1,11 +1,30 @@
 package org.ContinuityIns.mapper;
 
 import java.util.List;
+import java.util.Map;
+
 import org.ContinuityIns.DAO.ArticleDAO;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface ArticleMapper {
+
+    /**
+     * 获取每日推荐文章列表
+     * @param offset 偏移量
+     * @param pageSize 每页大小
+     * @return 推荐文章列表
+     */
+    @SelectProvider(type = ArticleSqlProvider.class, method = "getDailyRecommends")
+    List<Map<String, Object>> getDailyRecommends(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    /**
+     * 获取每日推荐文章总数
+     * @return 推荐文章总数
+     */
+    @SelectProvider(type = ArticleSqlProvider.class, method = "getDailyRecommendsCount")
+    int getDailyRecommendsCount();
+
     @Insert("INSERT INTO articles (title, user_id, content, cover_image, status, word_count) " +
             "VALUES (#{title}, #{userId}, #{content}, #{coverImage}, #{status}, #{duration})")
     int insertArticle(ArticleDAO articleDAO);
@@ -100,23 +119,34 @@ public interface ArticleMapper {
     /**
      * 获取用户特定状态的文章
      */
-    @Select("<script>" +
-            "SELECT * FROM articles WHERE user_id = #{userId} " +
-            "<if test='status != null'> AND status = #{status} </if>" +
-            "ORDER BY create_time DESC LIMIT #{offset}, #{pageSize}" +
-            "</script>")
-    List<ArticleDAO> selectUserArticles(
-            @Param("userId") Integer userId,
-            @Param("status") String status,
-            @Param("offset") Integer offset,
-            @Param("pageSize") Integer pageSize);
+    @SelectProvider(type = ArticleSqlProvider.class, method = "selectByUser")
+    List<ArticleDAO> selectUserArticles(@Param("userId") Integer userId,
+                               @Param("status") String status,
+                               @Param("offset") int offset,
+                               @Param("pageSize") int pageSize);
+
 
     /**
      * 获取用户特定状态的文章数量
      */
-    @Select("<script>" +
-            "SELECT COUNT(*) FROM articles WHERE user_id = #{userId} " +
-            "<if test='status != null'> AND status = #{status} </if>" +
-            "</script>")
+    @Select("SELECT COUNT(*) FROM articles WHERE user_id = #{userId} AND status = #{status}")
     int selectUserArticlesCount(@Param("userId") Integer userId, @Param("status") String status);
+
+    /**
+     * 统计特定状态的文章数量
+     */
+    @Select("SELECT COUNT(*) FROM articles WHERE status = #{status}")
+    int selectArticlesCountByStatus(String status);
+
+    /**
+     * 统计所有文章的总浏览量
+     */
+    @Select("SELECT COALESCE(SUM(view_count), 0) FROM articles")
+    int selectTotalViewCount();
+
+    /**
+     * 统计所有文章的总点赞数
+     */
+    @Select("SELECT COALESCE(SUM(like_count), 0) FROM articles")
+    int selectTotalLikeCount();
 }
