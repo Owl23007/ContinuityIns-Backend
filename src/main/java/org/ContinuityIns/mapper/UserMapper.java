@@ -3,7 +3,9 @@ package org.ContinuityIns.mapper;
 import org.ContinuityIns.DAO.UserDAO;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -101,10 +103,24 @@ public interface UserMapper {
             "LEFT JOIN user_settings us ON u.user_id = us.user_id " +
             "WHERE u.user_id = #{userId}")
     UserDAO getUserWithSettingsById(@Param("userId") Integer userId);
-    
+
     @Delete("DELETE FROM users WHERE status = 'UNVERIFIED' AND create_time < DATE_SUB(NOW(), INTERVAL 3 DAY)")
     void deleteUnverifiedUsers();
 
     @Update("UPDATE users SET token = #{token}, token_expiration = #{expiryDate} WHERE user_id = #{userId}")
     void updateToken(Integer userId, String token, Date expiryDate);
+
+    /**
+     * 搜索用户
+     * @param keyword 搜索关键词
+     * @param dateStart 开始时间
+     * @param dateEnd 结束时间
+     * @return 用户列表
+     */
+    @SelectProvider(type = UserSqlProvider.class, method = "searchUsers")
+    List<UserDAO> searchUsers(
+        @Param("keyword") String keyword,
+        @Param("dateStart") LocalDateTime dateStart,
+        @Param("dateEnd") LocalDateTime dateEnd
+    );
 }

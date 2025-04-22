@@ -1,5 +1,6 @@
 package org.ContinuityIns.mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +9,6 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface ArticleMapper {
-
     /**
      * 获取每日推荐文章列表
      * @param offset 偏移量
@@ -29,9 +29,6 @@ public interface ArticleMapper {
             "VALUES (#{title}, #{userId}, #{content}, #{coverImage}, #{status}, #{duration})")
     int insertArticle(ArticleDAO articleDAO);
 
-    @Select("SELECT * FROM articles")
-    List<ArticleDAO> selectAllArticles();
-
     @Update("UPDATE articles SET status = #{status} WHERE article_id = #{articleId}")
     int updateArticleStatus(int articleId, String status);
 
@@ -46,8 +43,10 @@ public interface ArticleMapper {
     @Delete("DELETE FROM articles WHERE article_id = #{articleId}")
     int deleteArticle(Integer articleId);
 
-    @Select("SELECT * FROM articles WHERE user_id = #{userId}")
-    List<ArticleDAO> selectArticlesByUser(Integer userId);
+    // 获取用户文章已发布列表, 按照发布时间排序,取前10条
+    @Select("SELECT * FROM articles WHERE user_id = #{userId} AND status = 'PUBLISHED' ORDER BY create_time DESC LIMIT 10")
+    List<ArticleDAO> selectArticlesByUser(@Param("userId") Integer userId);
+
 
     @Select("SELECT * FROM articles ORDER BY create_time DESC LIMIT #{offset}, #{pageSize}")
     List<ArticleDAO> selectArticlesPageByTime(@Param("offset") int offset, @Param("pageSize") int pageSize);
@@ -61,15 +60,27 @@ public interface ArticleMapper {
     @Select("SELECT COUNT(*) FROM articles WHERE status = 'PUBLISHED'")
     int selectTotalArticleCount();
 
+    /**
+     * 高级搜索文章
+     */
     @SelectProvider(type = ArticleSqlProvider.class, method = "searchArticles")
     List<ArticleDAO> searchArticles(
         @Param("keyword") String keyword,
-        @Param("offset") int offset,
-        @Param("pageSize") int pageSize
+        @Param("category") String category,
+        @Param("tags") List<String> tags,
+        @Param("dateStart") LocalDateTime dateStart,
+        @Param("dateEnd") LocalDateTime dateEnd,
+        @Param("sort") String sort
     );
 
     @SelectProvider(type = ArticleSqlProvider.class, method = "searchArticlesCount")
     int searchArticlesCount(@Param("keyword") String keyword);
+
+    /**
+     * 根据关键词搜索文章（新增方法）
+     */
+    @Select("SELECT * FROM articles WHERE title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%') LIMIT #{offset}, #{pageSize}")
+    List<ArticleDAO> searchArticlesByKeyword(@Param("keyword") String keyword, @Param("offset") int offset, @Param("pageSize") int pageSize);
 
     /**
      * 根据排序条件获取文章分页列表
@@ -90,31 +101,31 @@ public interface ArticleMapper {
      * 添加文章点赞
      */
     @Insert("INSERT INTO article_likes (article_id, user_id) VALUES (#{articleId}, #{userId})")
-    int insertArticleLike(@Param("articleId") Integer articleId, @Param("userId") Integer userId);
+    void insertArticleLike(@Param("articleId") Integer articleId, @Param("userId") Integer userId);
 
     /**
      * 删除文章点赞
      */
     @Delete("DELETE FROM article_likes WHERE article_id = #{articleId} AND user_id = #{userId}")
-    int deleteArticleLike(@Param("articleId") Integer articleId, @Param("userId") Integer userId);
-    
+    void deleteArticleLike(@Param("articleId") Integer articleId, @Param("userId") Integer userId);
+
     /**
      * 更新文章浏览量
      */
     @Update("UPDATE articles SET view_count = view_count + 1 WHERE article_id = #{articleId}")
-    int incrementViewCount(@Param("articleId") Integer articleId);
+    void incrementViewCount(@Param("articleId") Integer articleId);
 
     /**
      * 增加文章点赞数
      */
     @Update("UPDATE articles SET like_count = like_count + 1 WHERE article_id = #{articleId}")
-    int incrementLikeCount(@Param("articleId") Integer articleId);
+    void incrementLikeCount(@Param("articleId") Integer articleId);
 
     /**
      * 减少文章点赞数
      */
     @Update("UPDATE articles SET like_count = like_count - 1 WHERE article_id = #{articleId}")
-    int decrementLikeCount(@Param("articleId") Integer articleId);
+    void decrementLikeCount(@Param("articleId") Integer articleId);
 
     /**
      * 获取用户特定状态的文章
@@ -149,4 +160,5 @@ public interface ArticleMapper {
      */
     @Select("SELECT COALESCE(SUM(like_count), 0) FROM articles")
     int selectTotalLikeCount();
+
 }

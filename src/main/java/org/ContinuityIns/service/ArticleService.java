@@ -25,9 +25,6 @@ public interface ArticleService {
     // 更新文章状态
     Result updateArticleStatus(int articleId, String status);
     
-    // 通过ID获取文章详情
-    Result<ArticleDAO> getArticleById(Integer id);
-    
     // 更新文章
     Result updateArticle(ArticleDAO articleDAO);
     

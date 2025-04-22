@@ -40,7 +40,7 @@ public class ArticleServiceImpl implements ArticleService {
         Integer userId = (Integer) ThreadLocalUtil.get().get("id");
         articleDAO.setUserId(userId);
 
-        articleDAO.setDuration(articleDAO.getContent().length());
+        articleDAO.setWordCount(articleDAO.getContent().length());
         int rowsAffected = articleMapper.insertArticle(articleDAO);
         if (rowsAffected > 0) {
             return Result.success("文章创建成功");
@@ -51,14 +51,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Result<List<ArticleDAO>> getArticleProfileList(Integer userId) {
-        if (userId == 0 || userId == null) {
+        if (userId == 0) {
             userId = (Integer) ThreadLocalUtil.get().get("id");
         }
 
         List<ArticleDAO> articles = articleMapper.selectArticlesByUser(userId);
 
-        // 过滤掉非Published状态的文章
-        articles.removeIf(article -> !article.getStatus().equals(ArticleDAO.ArticleStatus.PUBLISHED));
         //获取最新的10篇文章
         articles = articles.subList(0, Math.min(articles.size(), 10));
         // 只保留文本前20个字符
@@ -67,17 +65,7 @@ public class ArticleServiceImpl implements ArticleService {
             if (content.length() > 20) {
                 article.setContent(content.substring(0, 20)+"...");
             }
-            UserDAO user= userMapper.getUserById(article.getUserId());
-            article.setAvatarImage(user.getAvatarImage());
-            article.setNickname(user.getNickname());
         }
-        // 添加文章浏览数据
-        articles.forEach(article -> {
-            article.setViewCount(article.getViewCount());
-            article.setLikeCount(article.getLikeCount());
-            article.setCommentCount(article.getCommentCount());
-            article.setCollectionCount(article.getCollectionCount());
-        });
         return Result.success(articles);
     }
 
@@ -95,19 +83,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result<ArticleDAO> getArticleById(Integer articleId) {
-        if (articleId == null || articleId <= 0) {
-            return Result.error("无效的文章ID");
-        }
-        ArticleDAO article = articleMapper.selectArticleById(articleId);
-        if (article != null) {
-            return Result.success(article);
-        } else {
-            return Result.error("文章未找到");
-        }
-    }
-
-    @Override
     public Result updateArticle(ArticleDAO articleDAO) {
         if (articleDAO == null || articleDAO.getArticleId() == null || articleDAO.getArticleId() <= 0) {
             return Result.error("无效的文章数据");
@@ -121,7 +96,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         articleDAO.setUserId(currentUserId);
-        articleDAO.setDuration(articleDAO.getContent().length());
+        articleDAO.setWordCount(articleDAO.getContent().length());
         int rowsAffected = articleMapper.updateArticle(articleDAO);
         if (rowsAffected > 0) {
             return Result.success("文章更新成功");
@@ -157,14 +132,13 @@ public class ArticleServiceImpl implements ArticleService {
             return Result.error("无效的用户ID");
         }
         List<ArticleDAO> articles = articleMapper.selectArticlesByUser(userId);
-
-        // 返回Published
-        articles.forEach(article -> {
-            if (article.getStatus() == null || !article.getStatus().equals(ArticleDAO.ArticleStatus.PUBLISHED)) {
-                articles.remove(article);
+        // 只保留文本前20个字符
+        for (ArticleDAO article : articles) {
+            String content = article.getContent();
+            if (content.length() > 20) {
+                article.setContent(content.substring(0, 20)+"...");
             }
-        });
-
+        }
         return Result.success(articles);
     }
 
@@ -187,14 +161,7 @@ public class ArticleServiceImpl implements ArticleService {
             
             // 计算总页数
             int totalPages = (total + pageSize - 1) / pageSize;
-            
-            // 为每篇文章添加用户名
-            for (ArticleDAO article : articles) {
-                UserDAO user= userMapper.getUserById(article.getUserId());
-                article.setAvatarImage(user.getAvatarImage());
-                article.setNickname(user.getNickname());
-            }
-            
+
             // 构建返回结果
             Map<String, Object> result = new HashMap<>();
             result.put("articles", articles);
@@ -223,7 +190,7 @@ public class ArticleServiceImpl implements ArticleService {
             int offset = (pageNum - 1) * pageSize;
             
             // 获取搜索结果
-            List<ArticleDAO> articles = articleMapper.searchArticles(keyword, offset, pageSize);
+            List<ArticleDAO> articles = articleMapper.searchArticlesByKeyword(keyword, offset, pageSize);
             
             // 获取符合搜索条件的总记录数
             int total = articleMapper.searchArticlesCount(keyword);
@@ -231,13 +198,7 @@ public class ArticleServiceImpl implements ArticleService {
             // 计算总页数
             int totalPages = (total + pageSize - 1) / pageSize;
             
-            // 为每篇文章添加用户名
-            for (ArticleDAO article : articles) {
-                UserDAO user= userMapper.getUserById(article.getUserId());
-                article.setAvatarImage(user.getAvatarImage());
-                article.setNickname(user.getNickname());
-            }
-            
+
             // 构建返回结果
             Map<String, Object> result = new HashMap<>();
             result.put("articles", articles);
@@ -384,7 +345,7 @@ public class ArticleServiceImpl implements ArticleService {
             }
 
             // 如果是登录用户查看，并且不是自己的文章，记录浏览记录并更新阅读量
-            if (viewerId != null && !viewerId.equals(article.getUserId())) {
+            if (viewerId != null && viewerId != 0 && !viewerId.equals(article.getUserId())) {
                 // 检查是否已经浏览过
                 if (viewMapper.checkUserViewed(articleId, viewerId) == 0) {
                     // 记录浏览记录
@@ -396,11 +357,6 @@ public class ArticleServiceImpl implements ArticleService {
                     viewMapper.updateArticleView(articleId, viewerId);
                 }
             }
-
-            // 获取作者信息
-            UserDAO user= userMapper.getUserById(article.getUserId());
-            article.setAvatarImage(user.getAvatarImage());
-            article.setNickname(user.getNickname());
 
             // 设置文章的统计数据（如果需要实时计算）
             int viewCount = viewMapper.getArticleViewCount(articleId);

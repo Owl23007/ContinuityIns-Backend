@@ -2,25 +2,30 @@ package org.ContinuityIns.DAO;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ArticleDAO {
     private Integer articleId;
-    private String title;
     private Integer userId;
-    private String nickname;
-    private String avatarImage;
+    private String title;
     private String content;
+    private String summary;
     private String coverImage;
     private ArticleStatus status;
-    private Integer duration;// 文章字数
-    private String createTime;
+    private Integer wordCount;
 
     private Integer viewCount;
     private Integer likeCount;
     private Integer commentCount;
     private Integer collectionCount;
 
+    private Boolean isTop;
+
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+
     public enum ArticleStatus {
-        PUBLISHED, DRAFT, BANNED, PRIVATE
+        PUBLISHED, DRAFT, BANNED, PRIVATE,PENDING
     }
 }

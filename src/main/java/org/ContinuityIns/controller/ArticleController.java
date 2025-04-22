@@ -65,7 +65,8 @@ public class ArticleController {
             return Result.error("无效的文章ID");
         }
         // 从ThreadLocal中获取当前登录用户ID（可能为null，表示未登录用户）
-        Integer viewerId = (Integer) ThreadLocalUtil.get().get("id");
+        Map<String, Object> userInfo = ThreadLocalUtil.get();
+        Integer viewerId = userInfo != null ? (Integer) userInfo.get("id") : 0;
         return articleService.viewArticle(articleId, viewerId);
     }
 
@@ -81,6 +82,7 @@ public class ArticleController {
     @GetMapping("/profile")
     public Result<List<ArticleDAO>> getMyArticle() {
         Integer userId = (Integer) ThreadLocalUtil.get().get("id");
+        System.out.println("userId: " + userId);
         return articleService.getArticleProfileList(userId);
     }
 
