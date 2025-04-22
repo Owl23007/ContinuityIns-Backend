@@ -37,11 +37,12 @@ public class RecommendServiceImpl implements RecommendService {
             // 获取推荐文章列表
             List<Map<String, Object>> articles = articleMapper.getDailyRecommends(offset, pageSize);
 
-            // 添加用户名
+            // 添加用户名与userId
             for (Map<String, Object> article : articles) {
                 Integer userId = (Integer) article.get("user_id");
                 String username = userMapper.getUserById(userId).getUsername();
                 article.put("author", username);
+                article.put("userId", userId);
             }
 
             // 简化内容

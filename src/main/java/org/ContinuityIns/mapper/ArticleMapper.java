@@ -36,7 +36,7 @@ public interface ArticleMapper {
     ArticleDAO selectArticleById(Integer id);
 
     @Update("UPDATE articles SET title = #{title}, user_id = #{userId}, content = #{content}, " +
-            "cover_image = #{coverImage}, status = #{status}, word_count = #{duration} " +
+            "cover_image = #{coverImage}, status = #{status}, word_count = #{wordCount} " +
             "WHERE article_id = #{articleId}")
     int updateArticle(ArticleDAO articleDAO);
 

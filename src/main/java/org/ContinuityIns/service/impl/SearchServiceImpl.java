@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +48,11 @@ public class SearchServiceImpl implements SearchService {
                 case "year":
                     searchDTO.setDateStart(now.minusDays(365));
                     break;
+                case "all":
+                    searchDTO.setDateStart(null);
+                    break;
+               default:
+                   return Result.error("不支持的时间范围");
             }
             searchDTO.setDateEnd(now);
         }
@@ -67,8 +71,6 @@ public class SearchServiceImpl implements SearchService {
             default:
                 return Result.error("不支持的搜索类型");
         }
-
-
 
         // 构建返回结果
         Map<String, Object> result = new HashMap<>();

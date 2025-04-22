@@ -72,7 +72,7 @@ public class ArticleController {
 
     @GetMapping("/{id}/check-edit-permission")
     public Result checkEditPermission(@PathVariable("id") Integer articleId) {
-        Integer userId = ThreadLocalUtil.getCurrentUser();
+        Integer userId = ThreadLocalUtil.get() != null ? (Integer) ThreadLocalUtil.get().get("id") : null;
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -121,7 +121,7 @@ public class ArticleController {
             return Result.error("无效的文章ID");
         }
         // 检查删除权限
-        Integer currentUserId = ThreadLocalUtil.getCurrentUser();
+        Integer currentUserId = (Integer) ThreadLocalUtil.get().get("id");
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }

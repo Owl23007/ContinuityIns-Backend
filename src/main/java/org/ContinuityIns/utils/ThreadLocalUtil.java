@@ -22,11 +22,4 @@ public class ThreadLocalUtil {
         threadLocal.remove();
     }
 
-    public static Integer getCurrentUser() {
-        Map<String, Object> map = threadLocal.get();
-        if (map != null) {
-            return (Integer) map.get("userId");
-        }
-        return null;
-    }
 }
