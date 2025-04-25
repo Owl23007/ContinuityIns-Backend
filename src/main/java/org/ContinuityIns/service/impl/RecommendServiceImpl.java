@@ -43,6 +43,7 @@ public class RecommendServiceImpl implements RecommendService {
                 String username = userMapper.getUserById(userId).getUsername();
                 article.put("author", username);
                 article.put("userId", userId);
+                article.put("articleId", article.get("article_id"));
             }
 
             // 简化内容

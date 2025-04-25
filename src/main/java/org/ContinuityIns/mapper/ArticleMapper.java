@@ -26,7 +26,7 @@ public interface ArticleMapper {
     int getDailyRecommendsCount();
 
     @Insert("INSERT INTO articles (title, user_id, content, cover_image, status, word_count) " +
-            "VALUES (#{title}, #{userId}, #{content}, #{coverImage}, #{status}, #{duration})")
+            "VALUES (#{title}, #{userId}, #{content}, #{coverImage}, #{status}, #{wordCount})")
     int insertArticle(ArticleDAO articleDAO);
 
     @Update("UPDATE articles SET status = #{status} WHERE article_id = #{articleId}")
