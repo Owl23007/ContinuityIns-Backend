@@ -161,4 +161,6 @@ public interface ArticleMapper {
     @Select("SELECT COALESCE(SUM(like_count), 0) FROM articles")
     int selectTotalLikeCount();
 
+    @Select("SELECT * FROM articles WHERE title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%')")
+    List<ArticleDAO> selectArticlesByKeyWords(String keyword);
 }
