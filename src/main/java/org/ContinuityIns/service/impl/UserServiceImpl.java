@@ -204,10 +204,6 @@ public class UserServiceImpl implements UserService {
         }
 
         UserDAO u = userMapper.getUserWithSettingsById(userId);
-        if (u != null) {
-            u.setAvatarImage(aliOssUtil.getCDNUrl(u.getAvatarImage()));
-            u.setBackgroundImage(aliOssUtil.getCDNUrl(u.getBackgroundImage()));
-        }
         return Result.success(u);
     }
 
@@ -217,8 +213,6 @@ public class UserServiceImpl implements UserService {
         if (u == null) {
             return Result.error("用户不存在");
         }
-        u.setAvatarImage(aliOssUtil.getCDNUrl(u.getAvatarImage()));
-        u.setBackgroundImage(aliOssUtil.getCDNUrl(u.getBackgroundImage()));
         return Result.success(u);
     }
 

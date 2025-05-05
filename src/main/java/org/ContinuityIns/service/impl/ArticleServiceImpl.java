@@ -95,6 +95,7 @@ public class ArticleServiceImpl implements ArticleService {
             return Result.error("没有编辑权限");
         }
 
+        System.out.println(articleDAO);
         articleDAO.setUserId(currentUserId);
         articleDAO.setWordCount(articleDAO.getContent().length());
         int rowsAffected = articleMapper.updateArticle(articleDAO);

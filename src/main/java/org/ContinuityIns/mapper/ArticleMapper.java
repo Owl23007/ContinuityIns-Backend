@@ -25,8 +25,8 @@ public interface ArticleMapper {
     @SelectProvider(type = ArticleSqlProvider.class, method = "getDailyRecommendsCount")
     int getDailyRecommendsCount();
 
-    @Insert("INSERT INTO articles (title, user_id, content, cover_image, status, word_count) " +
-            "VALUES (#{title}, #{userId}, #{content}, #{coverImage}, #{status}, #{wordCount})")
+    @Insert("INSERT INTO articles (title, user_id, content, cover_image,category_id, status, word_count) " +
+            "VALUES (#{title}, #{userId}, #{content}, #{coverImage},#{categoryId}, #{status}, #{wordCount})")
     int insertArticle(ArticleDAO articleDAO);
 
     @Update("UPDATE articles SET status = #{status} WHERE article_id = #{articleId}")
@@ -36,7 +36,7 @@ public interface ArticleMapper {
     ArticleDAO selectArticleById(Integer id);
 
     @Update("UPDATE articles SET title = #{title}, user_id = #{userId}, content = #{content}, " +
-            "cover_image = #{coverImage}, status = #{status}, word_count = #{wordCount} " +
+            "cover_image = #{coverImage}, status = #{status}, word_count = #{wordCount}, category_id =#{categoryId} " +
             "WHERE article_id = #{articleId}")
     int updateArticle(ArticleDAO articleDAO);
 

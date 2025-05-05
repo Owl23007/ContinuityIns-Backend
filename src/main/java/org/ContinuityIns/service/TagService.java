@@ -45,4 +45,16 @@ public interface TagService {
     Result<List<TagDAO>> getTagList(String keyword);
 
     List<TagDAO> getTagListByArticleId(Integer articleId);
+
+    /**
+     * <h1>获取热门标签列表</h1>
+     * <p>
+     * 功能描述：<p>
+     * 1. 获取系统中使用频率最高的标签列表<p>
+     * 2. 根据标签在文章中的使用次数进行降序排序<p>
+     * 3. 返回前10个最热门的标签<p>
+     *
+     * @return 热门标签列表
+     */
+    Result<List<TagDAO>> getHotTags();
 }

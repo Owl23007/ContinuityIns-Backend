@@ -61,6 +61,7 @@ CREATE TABLE articles (
                           content LONGTEXT NOT NULL COMMENT '内容',
                           summary VARCHAR(300) COMMENT '摘要',
                           cover_image VARCHAR(512) COMMENT '封面图URL',
+                          category_id INT NOT NULL COMMENT '分类ID',
                           status ENUM('DRAFT', 'PENDING', 'PUBLISHED', 'BANNED', 'PRIVATE') NOT NULL DEFAULT 'DRAFT' COMMENT '状态',
                           word_count SMALLINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '字数',
                           view_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '浏览数',
@@ -71,25 +72,13 @@ CREATE TABLE articles (
                           create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                           update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                           FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                          FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
                           INDEX idx_article_status (status),
                           INDEX idx_article_time (create_time),
                           FULLTEXT INDEX idx_fulltext (title, content) WITH PARSER ngram
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 文章历史版本表（新增）
-CREATE TABLE article_versions (
-                                  version_id INT AUTO_INCREMENT PRIMARY KEY,
-                                  article_id INT NOT NULL,
-                                  user_id INT NOT NULL,
-                                  title VARCHAR(150) NOT NULL,
-                                  content LONGTEXT NOT NULL,
-                                  word_count SMALLINT UNSIGNED NOT NULL,
-                                  version_number INT NOT NULL,
-                                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                  FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE,
-                                  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-                                  INDEX idx_article_version (article_id, version_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE articles ADD COLUMN category_id VARCHAR(50) comment '分类ID' AFTER cover_image;
 
 -- 分类表
 CREATE TABLE categories (
@@ -100,15 +89,6 @@ CREATE TABLE categories (
                             description VARCHAR(200) COMMENT '分类描述',
                             create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                             INDEX idx_category_parent (parent_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 文章分类关系表
-CREATE TABLE article_categories (
-                                    article_id INT NOT NULL COMMENT '文章ID',
-                                    category_id INT NOT NULL COMMENT '分类ID',
-                                    PRIMARY KEY (article_id, category_id),
-                                    FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE,
-                                    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 标签表

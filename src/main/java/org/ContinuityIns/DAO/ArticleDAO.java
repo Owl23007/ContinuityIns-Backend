@@ -25,6 +25,9 @@ public class ArticleDAO {
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
+    private Integer categoryId;
+    private String[] tags;
+
     public enum ArticleStatus {
         PUBLISHED, DRAFT, BANNED, PRIVATE,PENDING
     }

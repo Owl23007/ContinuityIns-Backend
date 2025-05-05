@@ -64,4 +64,13 @@ public class TagServiceImpl implements TagService {
 
         return null;
     }
+
+    @Override
+    public Result<List<TagDAO>> getHotTags() {
+        List<TagDAO> hotTags = tagMapper.getHotTags();
+        if (hotTags == null || hotTags.isEmpty()) {
+            return Result.error("暂无热门标签");
+        }
+        return Result.success(hotTags);
+    }
 }

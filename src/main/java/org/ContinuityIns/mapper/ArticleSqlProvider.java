@@ -13,7 +13,6 @@ public class ArticleSqlProvider {
             LEFT_OUTER_JOIN("article_likes al ON a.article_id = al.article_id");
             LEFT_OUTER_JOIN("article_view_records av ON a.article_id = av.article_id");
             WHERE("a.status = 'PUBLISHED'");
-            WHERE("a.create_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
             // 计算综合评分: 点赞数 * 0.6 + 浏览量 * 0.4
             ORDER_BY("(COALESCE(a.like_count, 0) * 0.6 + COALESCE(a.view_count, 0) * 0.4) DESC");
             ORDER_BY("a.create_time DESC");
