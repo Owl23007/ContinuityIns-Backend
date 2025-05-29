@@ -1,6 +1,5 @@
 package org.ContinuityIns.service.impl;
 
-import org.ContinuityIns.common.Result;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.service.TokenService;

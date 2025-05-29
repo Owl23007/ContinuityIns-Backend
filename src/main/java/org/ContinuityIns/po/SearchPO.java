@@ -7,5 +7,4 @@ public class SearchPO {
     private String keyword;
     private Integer userId;
     private Integer articleId;
-    // 可根据数据库表结构补充字段
 }
