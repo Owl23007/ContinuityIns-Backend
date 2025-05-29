@@ -1,6 +1,6 @@
 package org.ContinuityIns.service.impl;
 
-import org.ContinuityIns.DAO.TagDAO;
+import org.ContinuityIns.po.TagPO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.mapper.TagMapper;
 import org.ContinuityIns.service.TagService;
@@ -16,19 +16,18 @@ public class TagServiceImpl implements TagService {
     private TagMapper tagMapper;
 
     @Override
-    public Result getTagList(String keyword){
-        List<TagDAO> tagList = tagMapper.getTagListByKeyword(keyword);
+    public Result<List<TagPO>> getTagList(String keyword) {
+        List<TagPO> tagList = tagMapper.getTagListByKeyword(keyword);
         if (tagList == null || tagList.isEmpty()) {
-            return Result.error("没有找到相关标签");
+            return Result.custom(-1, "没有找到相关标签", (List<TagPO>) null);
         }
         return Result.success(tagList);
     }
 
     @Override
-    public List<TagDAO> getTagListByArticleId(Integer articleId) {
+    public List<TagPO> getTagListByArticleId(Integer articleId) {
         return List.of();
     }
-
 
     @Override
     public Integer findOrCreateTag(String tagName) {
@@ -36,8 +35,8 @@ public class TagServiceImpl implements TagService {
             return null; // 输入无效，直接返回null
         }
 
-        TagDAO tagDAO = tagMapper.getTag(tagName);
-        if (tagDAO == null) {
+        TagPO tagPO = tagMapper.getTag(tagName);
+        if (tagPO == null) {
             // 标签不存在，创建新标签
             Integer userId = (Integer) ThreadLocalUtil.get().get("id");
             tagMapper.addTag(tagName, userId);
@@ -45,7 +44,7 @@ public class TagServiceImpl implements TagService {
         }
 
         // 标签存在，检查状态
-        if (tagDAO.getTagStatus().equals(TagDAO.TagStatus.BANNED)) {
+        if (tagPO.getTagStatus().equals(TagPO.TagStatus.BANNED)) {
             return null; // 标签被禁用，返回null
         }
 
@@ -54,22 +53,21 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Result bindTag(List<String> tagList, Integer articleId) {
+    public Result<Void> bindTag(List<String> tagList, Integer articleId) {
         for (String tagName : tagList) {
             Integer tagId = findOrCreateTag(tagName);
             if (tagId != null) {
-                 tagMapper.bindTag(tagId, articleId);
+                tagMapper.bindTag(tagId, articleId);
             }
         }
-
-        return null;
+        return Result.custom(0, "success", (Void) null);
     }
 
     @Override
-    public Result<List<TagDAO>> getHotTags() {
-        List<TagDAO> hotTags = tagMapper.getHotTags();
+    public Result<List<TagPO>> getHotTags() {
+        List<TagPO> hotTags = tagMapper.getHotTags();
         if (hotTags == null || hotTags.isEmpty()) {
-            return Result.error("暂无热门标签");
+            return Result.custom(-1, "暂无热门标签", (List<TagPO>) null);
         }
         return Result.success(hotTags);
     }

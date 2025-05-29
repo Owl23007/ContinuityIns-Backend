@@ -1,6 +1,6 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.DAO.CommentDAO;
+import org.ContinuityIns.po.CommentPO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,19 +9,19 @@ import java.util.List;
 public interface CommentService {
 
     //添加评论
-    void addComment( CommentDAO comment);
+    void addComment( CommentPO comment);
 
     //删除评论
     void deleteComment(int CommentId);
 
     //获取评论列表
-    List<CommentDAO> getCommentList(String TargetType, int TargetId);
+    List<CommentPO> getCommentList(String TargetType, int TargetId);
 
     //获取评论数据
     Integer getCommentData(int CommentId);
 
     //修改评论内容
-    void UpdateCommentContent(CommentDAO comment);
+    void UpdateCommentContent(CommentPO comment);
 
     //点赞评论
     void likeComment(int CommentId, int userId);

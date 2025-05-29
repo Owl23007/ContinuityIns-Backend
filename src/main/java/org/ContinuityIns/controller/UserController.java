@@ -2,7 +2,7 @@ package org.ContinuityIns.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.service.UserService;
 import org.ContinuityIns.utils.CaptchaUtil;
 import org.ContinuityIns.utils.JwtUtil;
@@ -84,12 +84,12 @@ public class UserController {
     }
 
     @GetMapping("/userinfo")
-    public Result<UserDAO> onUserInfo() {
+    public Result<UserPO> onUserInfo() {
         return userService.getUserInfo();
     }
 
     @GetMapping("/userinfoById")
-    public Result<UserDAO> onUserInfoById(@RequestParam Integer userId) {
+    public Result<UserPO> onUserInfoById(@RequestParam Integer userId) {
         return userService.getUserInfoById(userId);
     }
 
@@ -167,7 +167,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public Result<UserDAO> getUserById(@PathVariable("id") Integer id) {
+    public Result<UserPO> getUserById(@PathVariable("id") Integer id) {
         return userService.getUserInfoById(id);
     }
 }

@@ -1,6 +1,6 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.DAO.SearchDTO;
+import org.ContinuityIns.dto.SearchDTO;
 import org.ContinuityIns.common.Result;
 
 public interface SearchService {

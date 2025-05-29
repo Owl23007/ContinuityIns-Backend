@@ -1,9 +1,9 @@
 package org.ContinuityIns.service.impl;
 
-import org.ContinuityIns.DAO.CategoryDAO;
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.CategoryPO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DAO.ArticleDAO;
+import org.ContinuityIns.po.ArticlePO;
 import org.ContinuityIns.mapper.ArticleMapper;
 import org.ContinuityIns.mapper.CategoryMapper;
 import org.ContinuityIns.mapper.UserMapper;
@@ -35,13 +35,13 @@ public class ArticleServiceImpl implements ArticleService {
     private AliOssUtil aliOssUtil;
 
     @Override
-    public Result createArticle(ArticleDAO articleDAO) {
+    public Result createArticle(ArticlePO articlePO) {
         // 获取当前用户的ID
         Integer userId = (Integer) ThreadLocalUtil.get().get("id");
-        articleDAO.setUserId(userId);
+        articlePO.setUserId(userId);
 
-        articleDAO.setWordCount(articleDAO.getContent().length());
-        int rowsAffected = articleMapper.insertArticle(articleDAO);
+        articlePO.setWordCount(articlePO.getContent().length());
+        int rowsAffected = articleMapper.insertArticle(articlePO);
         if (rowsAffected > 0) {
             return Result.success("文章创建成功");
         } else {
@@ -50,17 +50,17 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result<List<ArticleDAO>> getArticleProfileList(Integer userId) {
+    public Result<List<ArticlePO>> getArticleProfileList(Integer userId) {
         if (userId == 0) {
             userId = (Integer) ThreadLocalUtil.get().get("id");
         }
 
-        List<ArticleDAO> articles = articleMapper.selectArticlesByUser(userId);
+        List<ArticlePO> articles = articleMapper.selectArticlesByUser(userId);
 
         //获取最新的10篇文章
         articles = articles.subList(0, Math.min(articles.size(), 10));
         // 只保留文本前20个字符
-        for (ArticleDAO article : articles) {
+        for (ArticlePO article : articles) {
             String content = article.getContent();
             if (content.length() > 20) {
                 article.setContent(content.substring(0, 20)+"...");
@@ -83,22 +83,22 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result updateArticle(ArticleDAO articleDAO) {
-        if (articleDAO == null || articleDAO.getArticleId() == null || articleDAO.getArticleId() <= 0) {
+    public Result updateArticle(ArticlePO articlePO) {
+        if (articlePO == null || articlePO.getArticleId() == null || articlePO.getArticleId() <= 0) {
             return Result.error("无效的文章数据");
         }
         
         Integer currentUserId = (Integer) ThreadLocalUtil.get().get("id");
         // 检查编辑权限
-        Result<Boolean> permissionCheck = checkEditPermission(articleDAO.getArticleId(), currentUserId);
+        Result<Boolean> permissionCheck = checkEditPermission(articlePO.getArticleId(), currentUserId);
         if (!permissionCheck.getMessage() .equals("success") || !permissionCheck.getData()) {
             return Result.error("没有编辑权限");
         }
 
-        System.out.println(articleDAO);
-        articleDAO.setUserId(currentUserId);
-        articleDAO.setWordCount(articleDAO.getContent().length());
-        int rowsAffected = articleMapper.updateArticle(articleDAO);
+        System.out.println(articlePO);
+        articlePO.setUserId(currentUserId);
+        articlePO.setWordCount(articlePO.getContent().length());
+        int rowsAffected = articleMapper.updateArticle(articlePO);
         if (rowsAffected > 0) {
             return Result.success("文章更新成功");
         } else {
@@ -128,13 +128,13 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result<List<ArticleDAO>> getArticlesByUser(Integer userId) {
+    public Result<List<ArticlePO>> getArticlesByUser(Integer userId) {
         if (userId == null || userId <= 0) {
             return Result.error("无效的用户ID");
         }
-        List<ArticleDAO> articles = articleMapper.selectArticlesByUser(userId);
+        List<ArticlePO> articles = articleMapper.selectArticlesByUser(userId);
         // 只保留文本前20个字符
-        for (ArticleDAO article : articles) {
+        for (ArticlePO article : articles) {
             String content = article.getContent();
             if (content.length() > 20) {
                 article.setContent(content.substring(0, 20)+"...");
@@ -155,7 +155,7 @@ public class ArticleServiceImpl implements ArticleService {
             int offset = (pageNum - 1) * pageSize;
             
             // 获取分页数据
-            List<ArticleDAO> articles = articleMapper.selectArticlesPage(offset, pageSize, sortBy);
+            List<ArticlePO> articles = articleMapper.selectArticlesPage(offset, pageSize, sortBy);
             
             // 获取总记录数
             int total = articleMapper.selectTotalArticleCount();
@@ -191,7 +191,7 @@ public class ArticleServiceImpl implements ArticleService {
             int offset = (pageNum - 1) * pageSize;
             
             // 获取搜索结果
-            List<ArticleDAO> articles = articleMapper.searchArticlesByKeyword(keyword, offset, pageSize);
+            List<ArticlePO> articles = articleMapper.searchArticlesByKeyword(keyword, offset, pageSize);
             
             // 获取符合搜索条件的总记录数
             int total = articleMapper.searchArticlesCount(keyword);
@@ -225,7 +225,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         try {
             // 检查文章是否存在
-            ArticleDAO article = articleMapper.selectArticleById(articleId);
+            ArticlePO article = articleMapper.selectArticleById(articleId);
             if (article == null) {
                 return Result.error("文章不存在");
             }
@@ -254,7 +254,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         try {
             // 检查文章是否存在
-            ArticleDAO article = articleMapper.selectArticleById(articleId);
+            ArticlePO article = articleMapper.selectArticleById(articleId);
             if (article == null) {
                 return Result.error("文章不存在");
             }
@@ -300,7 +300,7 @@ public class ArticleServiceImpl implements ArticleService {
             int offset = (pageNum - 1) * pageSize;
             
             // 获取文章列表
-            List<ArticleDAO> articles = articleMapper.selectUserArticles(userId, status, offset, pageSize);
+            List<ArticlePO> articles = articleMapper.selectUserArticles(userId, status, offset, pageSize);
 
 
             
@@ -327,20 +327,20 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result<ArticleDAO> viewArticle(Integer articleId, Integer viewerId) {
+    public Result<ArticlePO> viewArticle(Integer articleId, Integer viewerId) {
         if (articleId == null) {
             return Result.error("文章ID不能为空");
         }
 
         try {
             // 获取文章信息
-            ArticleDAO article = articleMapper.selectArticleById(articleId);
+            ArticlePO article = articleMapper.selectArticleById(articleId);
             if (article == null) {
                 return Result.error("文章不存在");
             }
 
             // 检查文章状态和访问权限
-            if (!article.getStatus().equals(ArticleDAO.ArticleStatus.PUBLISHED) && 
+            if (!article.getStatus().equals(ArticlePO.ArticleStatus.PUBLISHED) && 
                 (viewerId == null || !viewerId.equals(article.getUserId()))) {
                 return Result.error("没有权限查看该文章");
             }
@@ -378,7 +378,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         try {
-            ArticleDAO article = articleMapper.selectArticleById(articleId);
+            ArticlePO article = articleMapper.selectArticleById(articleId);
             if (article == null) {
                 log.error("检查文章编辑权限失败：文章不存在 articleId={}", articleId);
                 return Result.error("文章不存在");
@@ -405,9 +405,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Result<List<CategoryDAO>> getCategories() {
-        List<CategoryDAO>categoryDAOS = categoryMapper.selectAll();
-        return Result.success(categoryDAOS);
+    public Result<List<CategoryPO>> getCategories() {
+        List<CategoryPO>categoryPOS = categoryMapper.selectAll();
+        return Result.success(categoryPOS);
     }
 
     @Override
@@ -416,7 +416,7 @@ public class ArticleServiceImpl implements ArticleService {
             Map<String, Object> stats = new HashMap<>();
             
             // 获取已发布文章总数
-            int publishedCount = articleMapper.selectArticlesCountByStatus(ArticleDAO.ArticleStatus.PUBLISHED.toString());
+            int publishedCount = articleMapper.selectArticlesCountByStatus(ArticlePO.ArticleStatus.PUBLISHED.toString());
             stats.put("publishedCount", publishedCount);
             
             // 获取总浏览量
@@ -429,7 +429,7 @@ public class ArticleServiceImpl implements ArticleService {
             
             // 获取各状态文章数量
             Map<String, Integer> statusCounts = new HashMap<>();
-            for (ArticleDAO.ArticleStatus status : ArticleDAO.ArticleStatus.values()) {
+            for (ArticlePO.ArticleStatus status : ArticlePO.ArticleStatus.values()) {
                 int count = articleMapper.selectArticlesCountByStatus(status.toString());
                 statusCounts.put(status.toString(), count);
             }

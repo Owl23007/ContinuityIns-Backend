@@ -1,6 +1,6 @@
 package org.ContinuityIns.controller;
 
-import org.ContinuityIns.DAO.CategoryDAO;
+import org.ContinuityIns.po.CategoryPO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,9 @@ public class CategoryController {
      * 获取所有分类
      */
     @GetMapping("")
-    public Result<List<CategoryDAO>> getAllCategories() {
+    public Result<List<CategoryPO>> getAllCategories() {
         try {
-            List<CategoryDAO> categories = categoryService.getAllCategories();
+            List<CategoryPO> categories = categoryService.getAllCategories();
             return Result.success(categories);
         } catch (Exception e) {
             return Result.error("获取分类列表失败: " + e.getMessage());
@@ -32,9 +32,9 @@ public class CategoryController {
      * 获取指定分类
      */
     @GetMapping("/{id}")
-    public Result<CategoryDAO> getCategoryById(@PathVariable("id") Integer categoryId) {
+    public Result<CategoryPO> getCategoryById(@PathVariable("id") Integer categoryId) {
         try {
-            CategoryDAO category = categoryService.getCategoryById(categoryId);
+            CategoryPO category = categoryService.getCategoryById(categoryId);
             if (category == null) {
                 return Result.error("分类不存在");
             }
@@ -48,9 +48,9 @@ public class CategoryController {
      * 获取子分类
      */
     @GetMapping("/{id}/children")
-    public Result<List<CategoryDAO>> getChildCategories(@PathVariable("id") Integer parentId) {
+    public Result<List<CategoryPO>> getChildCategories(@PathVariable("id") Integer parentId) {
         try {
-            List<CategoryDAO> children = categoryService.getChildCategories(parentId);
+            List<CategoryPO> children = categoryService.getChildCategories(parentId);
             return Result.success(children);
         } catch (Exception e) {
             return Result.error("获取子分类列表失败: " + e.getMessage());
@@ -61,14 +61,14 @@ public class CategoryController {
      * 创建分类
      */
     @PostMapping("")
-    public Result<CategoryDAO> createCategory(@RequestBody CategoryDAO category) {
+    public Result<CategoryPO> createCategory(@RequestBody CategoryPO category) {
         try {
             // 基本参数验证
             if (category == null || category.getName() == null || category.getName().trim().isEmpty()) {
                 return Result.error("分类名称不能为空");
             }
 
-            CategoryDAO newCategory = categoryService.createCategory(category);
+            CategoryPO newCategory = categoryService.createCategory(category);
             if (newCategory == null) {
                 return Result.error("创建分类失败");
             }
@@ -85,7 +85,7 @@ public class CategoryController {
      */
     @PutMapping("/{id}")
     public Result<Void> updateCategory(@PathVariable("id") Integer categoryId,
-                                     @RequestBody CategoryDAO category) {
+                                     @RequestBody CategoryPO category) {
         try {
             // 确保路径ID和请求体ID一致
             if (!categoryId.equals(category.getCategoryId())) {

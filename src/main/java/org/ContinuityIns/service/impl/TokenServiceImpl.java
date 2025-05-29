@@ -2,7 +2,7 @@ package org.ContinuityIns.service.impl;
 
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.mapper.UserMapper;
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class TokenServiceImpl implements TokenService {
 
     public Boolean verifyToken(String email, String token) {
         // 根据token和类型获取用户
-        UserDAO user = userMapper.getUserByEmail(email);
+        UserPO user = userMapper.getUserByEmail(email);
         if (user == null) {
             return false;
         }

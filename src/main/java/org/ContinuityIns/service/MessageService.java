@@ -1,6 +1,6 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.DAO.MessageDAO;
+import org.ContinuityIns.po.MessagePO;
 import org.ContinuityIns.common.Result;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public interface MessageService {
     Result sendMessage(Integer toId, String content);
 
-    Result<List<MessageDAO>> getMessage();
+    Result<List<MessagePO>> getMessage();
 
-    Result<List<MessageDAO>> getUnreadMessage();
+    Result<List<MessagePO>> getUnreadMessage();
 }

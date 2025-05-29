@@ -1,6 +1,6 @@
 package org.ContinuityIns.service.impl;
 
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.mapper.FollowerMapper;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.service.FollowService;
@@ -27,8 +27,8 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public List<UserDAO> selectFollowingsByUserId(Integer userId) {
-        List<UserDAO>res = new ArrayList<>();
+    public List<UserPO> selectFollowingsByUserId(Integer userId) {
+        List<UserPO>res = new ArrayList<>();
         for (Integer id : followerMapper.selectFolloweringIdsByUserId(userId)){
             res.add(userMapper.getUserById(id));
         }

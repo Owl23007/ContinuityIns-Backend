@@ -1,7 +1,7 @@
 package org.ContinuityIns.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.service.FollowService;
@@ -26,10 +26,10 @@ public class FollowerController {
     private FollowService followService;
     @GetMapping("/add")
     public Result addFollower(@RequestParam Integer userId){
-        UserDAO userDAO = userMapper.getUserById(userId);
+        UserPO userPO = userMapper.getUserById(userId);
         log.error("test");
 
-        if (userDAO == null){
+        if (userPO == null){
             return Result.error("用户不存在");
         }
         Map<String, Object> map = ThreadLocalUtil.get();
@@ -41,13 +41,13 @@ public class FollowerController {
     public Result queryFollowers(){
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer followerId = (Integer) map.get("id");
-        List<UserDAO> userDAOList = followService.selectFollowingsByUserId(followerId);
-        return Result.success(userDAOList);
+        List<UserPO> userPOList = followService.selectFollowingsByUserId(followerId);
+        return Result.success(userPOList);
     }
     @GetMapping("/delete")
     public Result deleteFollower(@RequestParam Integer userId){
-        UserDAO userDAO = userMapper.getUserById(userId);
-        if (userDAO == null){
+        UserPO userPO = userMapper.getUserById(userId);
+        if (userPO == null){
             return Result.error("用户不存在");
         }
         Map<String, Object> map = ThreadLocalUtil.get();

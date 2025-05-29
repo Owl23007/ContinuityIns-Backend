@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import org.ContinuityIns.DAO.ArticleDAO;
+import org.ContinuityIns.po.ArticlePO;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -27,35 +27,35 @@ public interface ArticleMapper {
 
     @Insert("INSERT INTO articles (title, user_id, content, cover_image,category_id, status, word_count) " +
             "VALUES (#{title}, #{userId}, #{content}, #{coverImage},#{categoryId}, #{status}, #{wordCount})")
-    int insertArticle(ArticleDAO articleDAO);
+    int insertArticle(ArticlePO ArticlePO);
 
     @Update("UPDATE articles SET status = #{status} WHERE article_id = #{articleId}")
     int updateArticleStatus(int articleId, String status);
 
     @Select("SELECT * FROM articles WHERE article_id = #{id}")
-    ArticleDAO selectArticleById(Integer id);
+    ArticlePO selectArticleById(Integer id);
 
     @Update("UPDATE articles SET title = #{title}, user_id = #{userId}, content = #{content}, " +
             "cover_image = #{coverImage}, status = #{status}, word_count = #{wordCount}, category_id =#{categoryId} " +
             "WHERE article_id = #{articleId}")
-    int updateArticle(ArticleDAO articleDAO);
+    int updateArticle(ArticlePO ArticlePO);
 
     @Delete("DELETE FROM articles WHERE article_id = #{articleId}")
     int deleteArticle(Integer articleId);
 
     // 获取用户文章已发布列表, 按照发布时间排序,取前10条
     @Select("SELECT * FROM articles WHERE user_id = #{userId} AND status = 'PUBLISHED' ORDER BY create_time DESC LIMIT 10")
-    List<ArticleDAO> selectArticlesByUser(@Param("userId") Integer userId);
+    List<ArticlePO> selectArticlesByUser(@Param("userId") Integer userId);
 
 
     @Select("SELECT * FROM articles ORDER BY create_time DESC LIMIT #{offset}, #{pageSize}")
-    List<ArticleDAO> selectArticlesPageByTime(@Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<ArticlePO> selectArticlesPageByTime(@Param("offset") int offset, @Param("pageSize") int pageSize);
 
     @Select("SELECT * FROM articles ORDER BY view_count DESC LIMIT #{offset}, #{pageSize}")
-    List<ArticleDAO> selectArticlesPageByView(@Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<ArticlePO> selectArticlesPageByView(@Param("offset") int offset, @Param("pageSize") int pageSize);
 
     @Select("SELECT * FROM articles ORDER BY like_count DESC LIMIT #{offset}, #{pageSize}")
-    List<ArticleDAO> selectArticlesPageByLike(@Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<ArticlePO> selectArticlesPageByLike(@Param("offset") int offset, @Param("pageSize") int pageSize);
 
     @Select("SELECT COUNT(*) FROM articles WHERE status = 'PUBLISHED'")
     int selectTotalArticleCount();
@@ -64,7 +64,7 @@ public interface ArticleMapper {
      * 高级搜索文章
      */
     @SelectProvider(type = ArticleSqlProvider.class, method = "searchArticles")
-    List<ArticleDAO> searchArticles(
+    List<ArticlePO> searchArticles(
         @Param("keyword") String keyword,
         @Param("category") String category,
         @Param("tags") List<String> tags,
@@ -80,13 +80,13 @@ public interface ArticleMapper {
      * 根据关键词搜索文章（新增方法）
      */
     @Select("SELECT * FROM articles WHERE title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%') LIMIT #{offset}, #{pageSize}")
-    List<ArticleDAO> searchArticlesByKeyword(@Param("keyword") String keyword, @Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<ArticlePO> searchArticlesByKeyword(@Param("keyword") String keyword, @Param("offset") int offset, @Param("pageSize") int pageSize);
 
     /**
      * 根据排序条件获取文章分页列表
      */
     @SelectProvider(type = ArticleSqlProvider.class, method = "selectArticlesPage")
-    List<ArticleDAO> selectArticlesPage(
+    List<ArticlePO> selectArticlesPage(
             @Param("offset") int offset,
             @Param("pageSize") int pageSize,
             @Param("sortBy") String sortBy);
@@ -131,7 +131,7 @@ public interface ArticleMapper {
      * 获取用户特定状态的文章
      */
     @SelectProvider(type = ArticleSqlProvider.class, method = "selectByUser")
-    List<ArticleDAO> selectUserArticles(@Param("userId") Integer userId,
+    List<ArticlePO> selectUserArticles(@Param("userId") Integer userId,
                                @Param("status") String status,
                                @Param("offset") int offset,
                                @Param("pageSize") int pageSize);
@@ -162,5 +162,5 @@ public interface ArticleMapper {
     int selectTotalLikeCount();
 
     @Select("SELECT * FROM articles WHERE title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%')")
-    List<ArticleDAO> selectArticlesByKeyWords(String keyword);
+    List<ArticlePO> selectArticlesByKeyWords(String keyword);
 }

@@ -1,33 +1,33 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.DAO.CategoryDAO;
+import org.ContinuityIns.po.CategoryPO;
 import java.util.List;
 
 public interface CategoryService {
     /**
      * 获取所有分类
      */
-    List<CategoryDAO> getAllCategories();
+    List<CategoryPO> getAllCategories();
 
     /**
      * 根据ID获取分类
      */
-    CategoryDAO getCategoryById(Integer categoryId);
+    CategoryPO getCategoryById(Integer categoryId);
 
     /**
      * 获取指定父分类下的所有子分类
      */
-    List<CategoryDAO> getChildCategories(Integer parentId);
+    List<CategoryPO> getChildCategories(Integer parentId);
 
     /**
      * 创建新分类
      */
-    CategoryDAO createCategory(CategoryDAO category);
+    CategoryPO createCategory(CategoryPO category);
 
     /**
      * 更新分类信息
      */
-    boolean updateCategory(CategoryDAO category);
+    boolean updateCategory(CategoryPO category);
 
     /**
      * 删除分类

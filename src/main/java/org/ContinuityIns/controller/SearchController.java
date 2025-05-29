@@ -1,6 +1,6 @@
 package org.ContinuityIns.controller;
 
-import org.ContinuityIns.DAO.SearchDTO;
+import org.ContinuityIns.dto.SearchDTO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;

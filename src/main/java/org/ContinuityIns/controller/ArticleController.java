@@ -1,9 +1,9 @@
 package org.ContinuityIns.controller;
 
 import jakarta.validation.Valid;
-import org.ContinuityIns.DAO.CategoryDAO;
+import org.ContinuityIns.po.CategoryPO;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DAO.ArticleDAO;
+import org.ContinuityIns.po.ArticlePO;
 import org.ContinuityIns.service.ArticleService;
 import org.ContinuityIns.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +80,7 @@ public class ArticleController {
     }
 
     @GetMapping("/profile")
-    public Result<List<ArticleDAO>> getMyArticle() {
+    public Result<List<ArticlePO>> getMyArticle() {
         Integer userId = (Integer) ThreadLocalUtil.get().get("id");
         System.out.println("userId: " + userId);
         return articleService.getArticleProfileList(userId);
@@ -97,7 +97,7 @@ public class ArticleController {
 
     @PutMapping("/{id}")
     public Result updateArticle(@PathVariable("id") Integer articleId,
-                                @RequestBody @Valid ArticleDAO articleDAO) {
+                                @RequestBody @Valid ArticlePO articlePO) {
         if (articleId == null || articleId <= 0) {
             return Result.error("无效的文章ID");
         }
@@ -111,8 +111,8 @@ public class ArticleController {
             return Result.error("没有编辑权限");
         }
 
-        articleDAO.setArticleId(articleId);
-        return articleService.updateArticle(articleDAO);
+        articlePO.setArticleId(articleId);
+        return articleService.updateArticle(articlePO);
     }
 
     @DeleteMapping("/{id}")
@@ -142,16 +142,16 @@ public class ArticleController {
     }
 
     @PostMapping("/create")
-    public Result createArticle(@RequestBody ArticleDAO articleDAO) {
-        if (articleDAO == null) {
+    public Result createArticle(@RequestBody ArticlePO articlePO) {
+        if (articlePO == null) {
             return Result.error("无效的文章数据");
         }
-        System.out.println(articleDAO);
-        return articleService.createArticle(articleDAO);
+        System.out.println(articlePO);
+        return articleService.createArticle(articlePO);
     }
 
     @GetMapping("/categories")
-    public Result<List<CategoryDAO>> getCategories() {
+    public Result<List<CategoryPO>> getCategories() {
         return articleService.getCategories();
     }
 

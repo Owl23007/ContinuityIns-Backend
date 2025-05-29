@@ -1,6 +1,6 @@
 package org.ContinuityIns.controller;
 
-import org.ContinuityIns.DAO.MessageDAO;
+import org.ContinuityIns.po.MessagePO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +15,17 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("/send")
-    public Result sendMessage(@RequestBody Integer toId, String content){
+    public Result sendMessage(@RequestBody Integer toId, String content) {
         return messageService.sendMessage(toId, content);
     }
 
     @GetMapping("/get")
-    public Result<List<MessageDAO>> getMessage(){
+    public Result<List<MessagePO>> getMessage() {
         return messageService.getMessage();
     }
 
     @GetMapping("/getUnread")
-    public Result<List<MessageDAO>> getUnreadMessage(){
+    public Result<List<MessagePO>> getUnreadMessage() {
         return messageService.getUnreadMessage();
     }
 }

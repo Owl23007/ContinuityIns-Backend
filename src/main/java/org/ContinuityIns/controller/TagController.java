@@ -1,6 +1,6 @@
 package org.ContinuityIns.controller;
 
-import org.ContinuityIns.DAO.TagDAO;
+import org.ContinuityIns.po.TagPO;
 import org.ContinuityIns.common.Result;
 import org.ContinuityIns.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +18,13 @@ public class TagController {
     private TagService tagService;
 
     @RequestMapping("/list")
-    public Result<List<TagDAO>> onGetTagList(String keyword) {
+    public Result<List<TagPO>> onGetTagList(String keyword) {
         return tagService.getTagList(keyword);
     }
 
     @RequestMapping("/listByArticleId")
     public Result onGetTagListByArticleId(Integer articleId) {
-       List<TagDAO> list= tagService.getTagListByArticleId(articleId);
+        List<TagPO> list = tagService.getTagListByArticleId(articleId);
         if (list == null || list.isEmpty()) {
             return Result.error("没有找到相关标签");
         }
@@ -34,12 +34,13 @@ public class TagController {
     /**
      * <h1>获取热门标签</h1>
      * <p>
-     * 功能描述：获取系统中使用频率最高的前10个标签<p>
+     * 功能描述：获取系统中使用频率最高的前10个标签
+     * <p>
      * 
      * @return Result 包含热门标签列表的结果对象
      */
     @GetMapping("/hot")
-    public Result<List<TagDAO>> onTagsHot() {
+    public Result<List<TagPO>> onTagsHot() {
         return tagService.getHotTags();
     }
 }

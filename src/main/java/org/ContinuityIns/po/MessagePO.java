@@ -1,11 +1,10 @@
-package org.ContinuityIns.DAO;
+package org.ContinuityIns.po;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data
-public class MessageDAO {
+public class MessagePO {
     private Integer messageId;
     private Integer senderId;
     private Integer receiverId;

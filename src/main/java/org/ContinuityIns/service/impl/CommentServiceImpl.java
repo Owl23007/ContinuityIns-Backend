@@ -1,7 +1,7 @@
 package org.ContinuityIns.service.impl;
 
 
-import org.ContinuityIns.DAO.CommentDAO;
+import org.ContinuityIns.po.CommentPO;
 import org.ContinuityIns.mapper.CommentMapper;
 import org.ContinuityIns.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ public class CommentServiceImpl implements CommentService {
     private CommentMapper commentMapper;
 
     @Override
-    public void addComment(CommentDAO commentDAO) {
-        commentMapper.addComment(commentDAO);
+    public void addComment(CommentPO commentPO) {
+        commentMapper.addComment(commentPO);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentDAO> getCommentList(String targetType, int targetId) {
+    public List<CommentPO> getCommentList(String targetType, int targetId) {
         return commentMapper.getCommentList(targetType, targetId);
     }
 
@@ -37,8 +37,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void UpdateCommentContent(CommentDAO commentDAO) {
-        commentMapper.UpdateCommentContent(commentDAO);
+    public void UpdateCommentContent(CommentPO commentPO) {
+        commentMapper.UpdateCommentContent(commentPO);
     }
 
     @Override

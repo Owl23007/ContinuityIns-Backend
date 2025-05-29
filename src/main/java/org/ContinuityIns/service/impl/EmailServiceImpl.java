@@ -1,11 +1,10 @@
 package org.ContinuityIns.service.impl;
 
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.service.EmailService;
 import org.ContinuityIns.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private UserMapper userMapper;
-
 
     @Autowired
     private TokenService tokenService;
@@ -44,11 +42,11 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Result verifyRegisterEmail(String email, String token) {
         // 获取用户
-        UserDAO u = userMapper.getUserByEmail(email);
+        UserPO u = userMapper.getUserByEmail(email);
         if (u == null) {
-            return  Result.error("用户不存在或邮件已过期,请先注册");
+            return Result.error("用户不存在或邮件已过期,请先注册");
         }
-        if(u.getStatus().equals(UserDAO.UserStatus.NORMAL)){
+        if (u.getStatus().equals(UserPO.UserStatus.NORMAL)) {
             return Result.error("用户已激活，请勿重复激活");
         }
 
@@ -56,11 +54,10 @@ public class EmailServiceImpl implements EmailService {
         tokenService.verifyToken(email, token);
 
         // 更新用户状态
-        userMapper.updateStatus( u.getUserId(), UserDAO.UserStatus.NORMAL);
+        userMapper.updateStatus(u.getUserId(), UserPO.UserStatus.NORMAL);
 
-        //初始化用户名和签名
-        userMapper.init(u.getUserId(), "这个人很懒，什么都没有留下", "存续院用户"+u.getUserId());
-
+        // 初始化用户名和签名
+        userMapper.init(u.getUserId(), "这个人很懒，什么都没有留下", "存续院用户" + u.getUserId());
 
         // 删除token
         userMapper.updateToken(u.getUserId(), null, null);
@@ -80,6 +77,5 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
-
 
 }

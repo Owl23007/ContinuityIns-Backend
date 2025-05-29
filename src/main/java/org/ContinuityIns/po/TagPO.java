@@ -1,14 +1,13 @@
-package org.ContinuityIns.DAO;
+package org.ContinuityIns.po;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data
-public class TagDAO {
+public class TagPO {
     private int tagId;
     private String tagName;
-    private int usrId; // 创建者id
+    private int usrId;
     private TagStatus tagStatus;
     private LocalDateTime createTime;
 

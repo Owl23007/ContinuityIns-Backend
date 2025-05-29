@@ -1,7 +1,7 @@
 package org.ContinuityIns.service;
 
-import org.ContinuityIns.DAO.ArticleDAO;
-import org.ContinuityIns.DAO.CategoryDAO;
+import org.ContinuityIns.po.ArticlePO;
+import org.ContinuityIns.po.CategoryPO;
 import org.ContinuityIns.common.Result;
 import org.springframework.stereotype.Service;
 
@@ -17,22 +17,22 @@ public interface ArticleService {
      **/
 
     // 创建文章
-    Result createArticle(ArticleDAO articleDAO);
+    Result createArticle(ArticlePO ArticlePO);
 
     // 获取当前用户的文章列表
-    Result<List<ArticleDAO>> getArticleProfileList(Integer userId);
+    Result<List<ArticlePO>> getArticleProfileList(Integer userId);
 
     // 更新文章状态
     Result updateArticleStatus(int articleId, String status);
     
     // 更新文章
-    Result updateArticle(ArticleDAO articleDAO);
+    Result updateArticle(ArticlePO ArticlePO);
     
     // 删除文章
     Result deleteArticle(Integer articleId);
     
     // 获取用户文章
-    Result<List<ArticleDAO>> getArticlesByUser(Integer userId);
+    Result<List<ArticlePO>> getArticlesByUser(Integer userId);
 
     /**
      * 分页获取文章列表
@@ -92,7 +92,7 @@ public interface ArticleService {
      * @param viewerId 查看者ID
      * @return 文章详情
      */
-    Result<ArticleDAO> viewArticle(Integer articleId, Integer viewerId);
+    Result<ArticlePO> viewArticle(Integer articleId, Integer viewerId);
 
     /**
      * 检查用户是否有权限编辑文章
@@ -102,7 +102,7 @@ public interface ArticleService {
      */
     Result<Boolean> checkEditPermission(Integer articleId, Integer userId);
 
-    Result<List<CategoryDAO>> getCategories();
+    Result<List<CategoryPO>> getCategories();
     /**
      * 获取文章统计信息
      * @return 包含统计信息的结果

@@ -4,7 +4,7 @@ import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.ContinuityIns.mapper.UserMapper;
 import org.ContinuityIns.common.Result;
-import org.ContinuityIns.DAO.UserDAO;
+import org.ContinuityIns.po.UserPO;
 import org.ContinuityIns.service.EmailService;
 import org.ContinuityIns.service.TokenService;
 import org.ContinuityIns.service.UserService;
@@ -36,7 +36,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AliOssUtil aliOssUtil;
 
-
     @Value("${org.ContinuityIns.url}")
     private String rootLink;
 
@@ -52,47 +51,44 @@ public class UserServiceImpl implements UserService {
     @Value("${org.ContinuityIns.workingHours}")
     private String workingHours;
 
-
     @Override
     public Result register(String username, String email, String password) {
         // 检查用户是否已存在
-        UserDAO u = userMapper.getUserByUsername(username);
-        if (u != null&&u.getStatus().equals(UserDAO.UserStatus.UNVERIFIED)) {
+        UserPO u = userMapper.getUserByUsername(username);
+        if (u != null && u.getStatus().equals(UserPO.UserStatus.UNVERIFIED)) {
             sendActivationEmail(username, email, rootLink);
-            return Result.error("用户已存在，请查看邮箱以激活账号");
+            return Result.error("用户已存在，请查收邮箱以激活账号");
         }
-        if(u!=null&&u.getStatus().equals(UserDAO.UserStatus.NORMAL)){
+        if (u != null && u.getStatus().equals(UserPO.UserStatus.NORMAL)) {
             return Result.error("用户已存在");
         }
-
         // 检查邮箱是否已经被注册
-        UserDAO user = userMapper.getUserByEmail(email);
+        UserPO user = userMapper.getUserByEmail(email);
         if (user != null) {
             return Result.error("邮箱已被注册");
         }
-        //是否为英文+数字组合
+        // 是否为英文+数字组合
         if (!username.matches("^[a-zA-Z0-9]+$")) {
             return Result.error("用户名只能为英文和数字");
         }
 
         String salt = EncrUtil.getSalt();
         String hashPassword = EncrUtil.getHash(password, salt);
-        
+
         // 使用事务保证用户注册和设置初始化的原子性
         try {
             userMapper.add(username, email, hashPassword, salt, username);
-            UserDAO ut = userMapper.getUserByUsername(username);
+            UserPO ut = userMapper.getUserByUsername(username);
             userMapper.initUserSettings(ut.getUserId());
         } catch (Exception e) {
             log.error("用户注册发生错误", e);
             return Result.error("注册失败");
         }
-        
         return sendActivationEmail(username, email, rootLink);
     }
 
     private Result sendActivationEmail(String username, String email, String rootLink) {
-        UserDAO u = userMapper.getUserByUsername(username);
+        UserPO u = userMapper.getUserByUsername(username);
         if (u == null || u.getUserId() == null) {
             return Result.error("用户注册失败");
         }
@@ -101,13 +97,16 @@ public class UserServiceImpl implements UserService {
             return Result.error("生成验证token失败");
         }
 
-        String htmlContent= String.format(
+        String htmlContent = String.format(
                 "<div style='font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;'>" +
-                        "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>欢迎注册%s</h3>" +
+                        "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>欢迎注册%s</h3>"
+                        +
                         "<p>尊敬的新用户：</p>" +
                         "<p>感谢您注册%s！为了完成您的注册流程，请点击下方按钮激活您的账户：</p>" +
-                        "<a href='%s/auth/active?email=%s&token=%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;'>立即激活账户</a>" +
-                        "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>" +
+                        "<a href='%s/auth/active?email=%s&token=%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;'>立即激活账户</a>"
+                        +
+                        "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>"
+                        +
                         "<h4 style='margin-top: 0; color: #2C5282;'>安全提示：</h4>" +
                         "<ul style='margin: 0; padding-left: 20px; color: #4A5568;'>" +
                         "<li>链接有效期至：注册后24小时</li>" +
@@ -126,14 +125,13 @@ public class UserServiceImpl implements UserService {
                         "<p>%s 团队</p>" +
                         "</footer>" +
                         "</div>",
-                companyName, companyName, rootLink, email, token,rootLink,serviceEmail, companyName);
+                companyName, companyName, rootLink, email, token, rootLink, serviceEmail, companyName);
         try {
             emailService.sendHtmlEmail(
                     email,
                     String.format("欢迎!你正在注册%s的账号", companyName),
-                    htmlContent
-            );
-        }catch (MessagingException e){
+                    htmlContent);
+        } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
         return Result.success("注册成功，请查看邮箱以激活账号");
@@ -142,13 +140,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result<String> activateAccount(String email, String token) {
         // 获取用户信息
-        UserDAO user = userMapper.getUserByEmail(email);
+        UserPO user = userMapper.getUserByEmail(email);
         if (user == null) {
             return Result.error("账号不存在");
         }
 
         // 检查账号状态
-        if (user.getStatus().equals(UserDAO.UserStatus.NORMAL)) {
+        if (user.getStatus().equals(UserPO.UserStatus.NORMAL)) {
             return Result.error("账号已激活");
         }
 
@@ -159,32 +157,33 @@ public class UserServiceImpl implements UserService {
         }
 
         // 更新用户状态
-        userMapper.updateStatus(user.getUserId(), UserDAO.UserStatus.NORMAL);
+        userMapper.updateStatus(user.getUserId(), UserPO.UserStatus.NORMAL);
 
         return Result.success("账号激活成功");
     }
 
     @Override
     public Result<String> login(String identifier, String password, String ipAddress) {
-        //public
+        // public
         String username = identifier.contains("@") ? userMapper.getUsernameByEmail(identifier) : identifier;
-        UserDAO loginUser = userMapper.getUserByUsername(username);
+        UserPO loginUser = userMapper.getUserByUsername(username);
         if (loginUser == null) {
             return Result.error("用户名不存在");
         }
-        if (!Objects.equals(loginUser.getStatus(), UserDAO.UserStatus.NORMAL)) {
+        if (!Objects.equals(loginUser.getStatus(), UserPO.UserStatus.NORMAL)) {
             return switch (loginUser.getStatus()) {
-                case UserDAO.UserStatus.UNVERIFIED -> Result.error("账号未激活");
-                case UserDAO.UserStatus.DEACTIVATED -> Result.error("账号已注销");
-                case UserDAO.UserStatus.BANNED -> Result.error("账号已封禁");
+                case UNVERIFIED -> Result.error("账号未激活");
+                case DEACTIVATED -> Result.error("账号已注销");
+                case BANNED -> Result.error("账号已封禁");
                 default -> Result.error("账号状态异常");
             };
         }
         String salt = userMapper.getSaltByUserId(loginUser.getUserId());
-        if (Objects.equals(EncrUtil.getHash(password, salt), userMapper.getEncrPasswordByUserId(loginUser.getUserId()))) {
+        if (Objects.equals(EncrUtil.getHash(password, salt),
+                userMapper.getEncrPasswordByUserId(loginUser.getUserId()))) {
             // 更新最后登录时间和IP
             userMapper.updateLastLogin(loginUser.getUserId(), new Date(), ipAddress);
-            
+
             Map<String, Object> claims = new HashMap<>();
             claims.put("id", loginUser.getUserId());
             claims.put("username", loginUser.getUsername());
@@ -195,21 +194,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<UserDAO> getUserInfo() {
+    public Result<UserPO> getUserInfo() {
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
 
-        if(!isVaildate(userId)){
+        if (!isVaildate(userId)) {
             return Result.error("用户状态异常");
         }
 
-        UserDAO u = userMapper.getUserWithSettingsById(userId);
+        UserPO u = userMapper.getUserWithSettingsById(userId);
         return Result.success(u);
     }
 
     @Override
     public Result getUserInfoById(Integer userId) {
-        UserDAO u = userMapper.getUserById(userId);
+        UserPO u = userMapper.getUserById(userId);
         if (u == null) {
             return Result.error("用户不存在");
         }
@@ -223,7 +222,7 @@ public class UserServiceImpl implements UserService {
         }
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
-        
+
         if (!isVaildate(userId)) {
             return Result.error("用户状态异常");
         }
@@ -239,7 +238,7 @@ public class UserServiceImpl implements UserService {
 
     // 新增：更新用户设置
     @Override
-    public Result updateUserSettings(UserDAO.UserTheme theme, String notificationPreferences, String privacySettings) {
+    public Result updateUserSettings(UserPO.UserTheme theme, String notificationPreferences, String privacySettings) {
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
 
@@ -303,7 +302,7 @@ public class UserServiceImpl implements UserService {
             return Result.error("缺少参数。");
         }
         Map<String, Object> claims = ThreadLocalUtil.get();
-        UserDAO loginUser = userMapper.getUserByUsername((String) claims.get("username"));
+        UserPO loginUser = userMapper.getUserByUsername((String) claims.get("username"));
 
         String salt = userMapper.getSaltByUserId(loginUser.getUserId());
         if (!EncrUtil.getHash(oldPwd, salt).equals(userMapper.getEncrPasswordByUserId(loginUser.getUserId()))) {
@@ -326,11 +325,12 @@ public class UserServiceImpl implements UserService {
             return Result.error("用户状态异常");
         }
 
-        UserDAO deleteUser = userMapper.getUserById(userId);
+        UserPO deleteUser = userMapper.getUserById(userId);
         String salt = userMapper.getSaltByUserId(deleteUser.getUserId());
 
         // 检查密码是否正确
-        if (!Objects.equals(EncrUtil.getHash(password, salt), userMapper.getEncrPasswordByUserId(deleteUser.getUserId()))) {
+        if (!Objects.equals(EncrUtil.getHash(password, salt),
+                userMapper.getEncrPasswordByUserId(deleteUser.getUserId()))) {
             return Result.error("密码错误。");
         }
 
@@ -340,21 +340,23 @@ public class UserServiceImpl implements UserService {
 
         userMapper.cancel(userId);
 
-        if (!Objects.equals(userMapper.getUserById(userId).getStatus(), UserDAO.UserStatus.DEACTIVATED)) {
+        if (!Objects.equals(userMapper.getUserById(userId).getStatus(), UserPO.UserStatus.DEACTIVATED)) {
             return Result.error("注销失败。");
         }
 
-        //创建新token
+        // 创建新token
         String token = tokenService.generateToken(userId);
 
         // 发送注销邮件
         String htmlContent = String.format(
                 "<div style='font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;'>" +
-                        "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>您的%s账户已被注销</h3>" +
+                        "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>您的%s账户已被注销</h3>"
+                        +
                         "<p>尊敬的%s：</p>" +
                         "<p>我们已收到您账户的注销请求，您的%s账号已被成功注销。</p>" +
                         "<p><strong>注意：</strong>如果这不是您的操作，请于7天内联系管理员进行恢复。</p>" +
-                        "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>" +
+                        "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>"
+                        +
                         "<h4 style='margin-top: 0; color: #2C5282;'>账户信息：</h4>" +
                         "<ul style='margin: 0; padding-left: 20px; color: #4A5568;'>" +
                         "<li>账户ID: %s</li>" +
@@ -376,8 +378,7 @@ public class UserServiceImpl implements UserService {
             emailService.sendHtmlEmail(
                     email,
                     String.format("[重要] 您的%s账户已被注销", companyName),
-                    htmlContent
-            );
+                    htmlContent);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
@@ -389,7 +390,7 @@ public class UserServiceImpl implements UserService {
         if (!isVaildate((Integer) ThreadLocalUtil.get().get("id"))) {
             return Result.error("用户状态异常");
         }
-        String path,fileName;
+        String path, fileName;
         int maxSize;
 
         int userId = (Integer) ThreadLocalUtil.get().get("id");
@@ -397,57 +398,56 @@ public class UserServiceImpl implements UserService {
         switch (type) {
             case "avatar":
                 path = "avatar/";
-                fileName = path+"avatar-"+userId;
+                fileName = path + "avatar-" + userId;
                 maxSize = 2 * 1024 * 1024;
                 break;
             case "background":
                 path = "background/";
-                fileName = path+"background-"+userId;
+                fileName = path + "background-" + userId;
                 maxSize = 10 * 1024 * 1024;
                 break;
             case "article":
                 path = "article/";
-                fileName =path+ "article-"+userId+"-"+System.currentTimeMillis();
+                fileName = path + "article-" + userId + "-" + System.currentTimeMillis();
                 maxSize = 10 * 1024 * 1024;
                 break;
             default:
                 return Result.error("类型错误");
         }
         // 获取OSS上传策略
-        String[] contentTypes = new String[]{"image/jpeg", "image/jpg", "image/png"};
+        String[] contentTypes = new String[] { "image/jpeg", "image/jpg", "image/png" };
 
-        return Result.success(aliOssUtil.generatePostPolicy(path,fileName, 15*60, 10, maxSize, contentTypes ));
+        return Result.success(aliOssUtil.generatePostPolicy(path, fileName, 15 * 60, 10, maxSize, contentTypes));
     }
 
     @Override
     public Result sendResetEmail(String email) {
         // 获取用户信息
-        UserDAO user = userMapper.getUserByEmail(email);
+        UserPO user = userMapper.getUserByEmail(email);
         if (user == null) {
             return Result.error("用户不存在");
         }
         // 获取用户状态
-        if (!user.getStatus().equals(UserDAO.UserStatus.NORMAL)) {
+        if (!user.getStatus().equals(UserPO.UserStatus.NORMAL)) {
             return Result.error("用户状态异常");
         }
 
         final int userId = user.getUserId();
         final long currentTime = System.currentTimeMillis();
 
-
         String token = null;
         try {
             // 检查token是否存在且未过期
-            UserDAO existingToken = userMapper.getUserById(userId);
+            UserPO existingToken = userMapper.getUserById(userId);
 
             if (existingToken == null) {
                 // 生成新token
                 token = tokenService.generateToken(userId);
-            } else if (existingToken.getTokenExpirationToLong() - currentTime <  24 * 60 * 60 * 1000) {
+            } else if (existingToken.getTokenExpirationToLong() - currentTime < 24 * 60 * 60 * 1000) {
                 // token过期时间在24小时之内
                 token = tokenService.generateToken(userId);
-            } else if (existingToken.getTokenExpirationToLong() - currentTime <  60 * 1000) {
-                //60秒内只能发送一次
+            } else if (existingToken.getTokenExpirationToLong() - currentTime < 60 * 1000) {
+                // 60秒内只能发送一次
                 return Result.error("60秒内只能发送一次重置邮件");
             }
         } catch (Exception e) {
@@ -470,7 +470,8 @@ public class UserServiceImpl implements UserService {
 
             // HTML邮件模板
             String htmlContent = String.format(
-                    "<div style='font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;'>" +
+                    "<div style='font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;'>"
+                            +
                             "<h3 style='color: #2B6CB0; border-bottom: 2px solid #2B6CB0; padding-bottom: 8px;'>" +
                             "[重要] 您的%s账户密码重置指引" +
                             "</h3>" +
@@ -479,12 +480,14 @@ public class UserServiceImpl implements UserService {
 
                             "<p>我们收到了您于<strong>%s</strong>发起的密码重置请求，请点击下方按钮完成操作：</p>" +
 
-                            "<a href='%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; " +
+                            "<a href='%s' style='display: inline-block; padding: 12px 24px; background-color: #2B6CB0; "
+                            +
                             "color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;'>" +
                             "立即重置密码" +
                             "</a>" +
 
-                            "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>" +
+                            "<div style='background: #F7FAFC; padding: 16px; border-left: 4px solid #2B6CB0; margin: 20px 0;'>"
+                            +
                             "<h4 style='margin-top: 0; color: #2C5282;'>安全提示：</h4>" +
                             "<ul style='margin: 0; padding-left: 20px; color: #4A5568;'>" +
                             "<li>链接有效期至：%s</li>" +
@@ -515,15 +518,13 @@ public class UserServiceImpl implements UserService {
                     serviceEmail,
                     workingHours,
                     companyName,
-                    officialWebsite
-            );
+                    officialWebsite);
 
             // 发送HTML邮件
             emailService.sendHtmlEmail(
                     email,
                     String.format("[重要] 您的%s账户密码重置指引", companyName),
-                    htmlContent
-            );
+                    htmlContent);
             return Result.success("重置链接已发送至您的邮箱");
         } catch (Exception e) {
             return Result.error("邮件发送失败，请检查邮箱地址");
@@ -533,12 +534,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result resetPassword(String email, String token, String password) {
         // 获取用户信息
-        UserDAO u = userMapper.getUserByEmail(email);
+        UserPO u = userMapper.getUserByEmail(email);
         if (u == null) {
             return Result.error("用户不存在");
         }
-        //判断用户状态
-        if (!u.getStatus().equals(UserDAO.UserStatus.NORMAL)) {
+        // 判断用户状态
+        if (!u.getStatus().equals(UserPO.UserStatus.NORMAL)) {
             return Result.error("用户状态异常");
         }
 
@@ -555,7 +556,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Boolean isVaildate(Integer userId) {
         // 检查用户是否存在且状态正常
-        UserDAO user = userMapper.getUserById(userId);
-        return user != null && user.getStatus().equals(UserDAO.UserStatus.NORMAL);
+        UserPO user = userMapper.getUserById(userId);
+        return user != null && user.getStatus().equals(UserPO.UserStatus.NORMAL);
     }
 }

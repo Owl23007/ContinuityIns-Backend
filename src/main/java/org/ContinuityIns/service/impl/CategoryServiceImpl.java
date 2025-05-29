@@ -1,6 +1,6 @@
 package org.ContinuityIns.service.impl;
 
-import org.ContinuityIns.DAO.CategoryDAO;
+import org.ContinuityIns.po.CategoryPO;
 import org.ContinuityIns.mapper.CategoryMapper;
 import org.ContinuityIns.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,12 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryMapper categoryMapper;
 
     @Override
-    public List<CategoryDAO> getAllCategories() {
+    public List<CategoryPO> getAllCategories() {
         return categoryMapper.selectAll();
     }
 
     @Override
-    public CategoryDAO getCategoryById(Integer categoryId) {
+    public CategoryPO getCategoryById(Integer categoryId) {
         if (categoryId == null) {
             return null;
         }
@@ -30,13 +30,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDAO> getChildCategories(Integer parentId) {
+    public List<CategoryPO> getChildCategories(Integer parentId) {
         return categoryMapper.selectByParentId(parentId);
     }
 
     @Override
     @Transactional
-    public CategoryDAO createCategory(CategoryDAO category) {
+    public CategoryPO createCategory(CategoryPO category) {
         if (category == null) {
             throw new IllegalArgumentException("分类信息不能为空");
         }
@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         // 如果设置了父分类ID，验证父分类是否存在
         if (category.getParentId() > 0) {
-            CategoryDAO parentCategory = getCategoryById(category.getParentId());
+            CategoryPO parentCategory = getCategoryById(category.getParentId());
             if (parentCategory == null) {
                 throw new IllegalArgumentException("父分类不存在");
             }
@@ -67,13 +67,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public boolean updateCategory(CategoryDAO category) {
+    public boolean updateCategory(CategoryPO category) {
         if (category == null || category.getCategoryId() == null) {
             throw new IllegalArgumentException("分类信息不完整");
         }
 
         // 验证分类是否存在
-        CategoryDAO existingCategory = getCategoryById(category.getCategoryId());
+        CategoryPO existingCategory = getCategoryById(category.getCategoryId());
         if (existingCategory == null) {
             throw new IllegalArgumentException("要更新的分类不存在");
         }
@@ -86,7 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
                 throw new IllegalArgumentException("不能将分类的父分类设置为自己");
             }
             if (category.getParentId() > 0) {
-                CategoryDAO newParentCategory = getCategoryById(category.getParentId());
+                CategoryPO newParentCategory = getCategoryById(category.getParentId());
                 if (newParentCategory == null) {
                     throw new IllegalArgumentException("新的父分类不存在");
                 }
@@ -104,7 +104,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         // 验证分类是否存在
-        CategoryDAO category = getCategoryById(categoryId);
+        CategoryPO category = getCategoryById(categoryId);
         if (category == null) {
             throw new IllegalArgumentException("要删除的分类不存在");
         }

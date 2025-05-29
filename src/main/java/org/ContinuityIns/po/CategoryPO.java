@@ -1,10 +1,10 @@
-package org.ContinuityIns.DAO;
+package org.ContinuityIns.po;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
+
 @Data
-public class CategoryDAO{
+public class CategoryPO {
     private Integer categoryId;
     private String name;
     private Integer parentId;
@@ -12,4 +12,3 @@ public class CategoryDAO{
     private String description;
     private LocalDateTime createTime;
 }
-
